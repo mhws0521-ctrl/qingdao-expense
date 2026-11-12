@@ -35,6 +35,7 @@
 
 @media(min-width:900px){#tab-trip-summary{grid-column:1/-1}#tab-trip-summary>.panel{max-width:1000px;margin:auto}}
 .ts-scroll{width:100%;overflow-x:auto}.ts-table{width:100%;border-collapse:collapse;table-layout:fixed;min-width:540px}.ts-table th,.ts-table td{border-bottom:1px solid var(--edge);padding:12px 8px;text-align:left;vertical-align:middle}.ts-table th:nth-child(1){width:27%}.ts-table th:nth-child(2){width:25%}.ts-table th:nth-child(3){width:48%}.ts-table input{width:100%;min-width:0;font-size:14px;padding:12px 8px;box-sizing:border-box}.ts-emphasis{background:rgba(84,221,197,.1)}@media(max-width:600px){.ts-table{min-width:0;table-layout:fixed}.ts-table th,.ts-table td{padding:9px 3px;font-size:12px;overflow-wrap:anywhere}.ts-table th:nth-child(1){width:25%}.ts-table th:nth-child(2){width:30%}.ts-table th:nth-child(3){width:45%}.ts-table input{font-size:12px;padding:9px 4px}}
+.q7-home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.q7-home-card{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:24px;padding:32px;min-height:220px;border-radius:20px;border:1px solid var(--edge);background:#173746;color:var(--text);cursor:pointer}.q7-home-card:nth-child(2){background:#253350}.q7-home-card strong{font-size:25px}.q7-home-card small{font-size:15px;line-height:1.6;color:var(--muted)}.q7-subnav{display:flex;align-items:center;gap:16px;margin:12px 0}[hidden]{display:none!important}@media(max-width:650px){.q7-home-grid{grid-template-columns:1fr}.q7-home-card{min-height:155px;padding:22px}}
 </style>
 </head>
 <body>
@@ -58,13 +59,13 @@
 </section>
 <section id="first-pin-change" class="panel center-box" hidden><h2>첫 로그인 · 비밀번호 변경 필수</h2><p class="muted">새 비밀번호를 숫자 4자리로 설정하세요. 1111은 사용할 수 없습니다.</p><form id="first-pin-form" class="form-grid"><label>현재 비밀번호 <input id="first-old-pin" type="password" inputmode="numeric" minlength="4" maxlength="4" pattern="[0-9]{4}" required placeholder="1111"></label><label>새 비밀번호 (숫자 4자리) <input id="first-new-pin" type="password" inputmode="numeric" minlength="4" maxlength="4" pattern="[0-9]{4}" required></label><label>새 비밀번호 확인 <input id="first-confirm-pin" type="password" inputmode="numeric" minlength="4" maxlength="4" pattern="[0-9]{4}" required></label><button class="primary" type="submit">변경하고 다시 로그인</button></form></section><main id="app" hidden>
   <section class="hero"><div><small>SHARED ACCOUNTING</small><h2><span id="welcome"></span>님, 반갑습니다.</h2><p>모든 경비는 Supabase의 비공개 JSON 데이터로 함께 저장됩니다.</p></div><button id="sync" class="secondary" type="button">↻ 동기화</button></section>
-  <div class="summary-grid">
+  <div class="summary-grid subview">
     <article class="stat"><small>공통통장 환급 대기</small><strong id="pending-total">0원</strong><span>공통통장 → 개인</span></article>
     <article class="stat"><small>공통통장 잔액</small><strong id="pool-balance">0원</strong><span>환급 전 잔액</span></article>
     <article class="stat"><small>개인 간 송금</small><strong id="personal-total">0원</strong><span>개인별 직접 정산</span></article>
   </div>
-  <div class="save-strip"><span id="synced-at">공유 데이터 연결됨</span><button id="retry-outbox" type="button" class="link" hidden>미전송 기록 다시 보내기</button><button id="stale-outbox-download" type="button" class="link" hidden>이전 미전송 백업</button><button id="stale-outbox-clear" type="button" class="link" hidden>이전 미전송 폐기</button></div>
-  <nav class="tabs" aria-label="메뉴"><button class="active" data-tab="entry">＋ 경비 등록</button><button data-tab="records">전체 내역</button><button data-tab="settlement">정산 현황</button><button data-tab="trip-summary">여행 종합정산</button><button data-tab="admin">설정·백업</button></nav>
+  <div class="save-strip subview"><span id="synced-at">공유 데이터 연결됨</span><button id="retry-outbox" type="button" class="link" hidden>미전송 기록 다시 보내기</button><button id="stale-outbox-download" type="button" class="link" hidden>이전 미전송 백업</button><button id="stale-outbox-clear" type="button" class="link" hidden>이전 미전송 폐기</button></div>
+  <section id="tab-home" class="tab-panel"><div class="section-heading"><div><small>QINGDAO</small><h2>정산 메뉴 선택</h2></div></div><div class="q7-home-grid"><button type="button" class="q7-home-card" data-home-target="trip-summary"><strong>📋 여행 종합정산</strong><small>공통통장 · 용도별 경비 · 입금 대상 · PDF</small></button><button type="button" class="q7-home-card" data-home-target="entry"><strong>👥 개인 간 정산</strong><small>7명 개인별 경비 · 송금 · 환급</small></button></div></section><div class="q7-subnav subview"><button id="q7-back-home" type="button" class="secondary">‹ 메인으로</button><b>개인 간 정산</b></div><nav class="tabs subview" aria-label="개인 간 정산"><button class="active" data-tab="entry">＋ 경비 등록</button><button data-tab="records">전체 내역</button><button data-tab="settlement">정산 현황</button><button data-tab="admin">설정·백업</button></nav>
   <section id="tab-entry" class="tab-panel">
     <div class="section-heading"><div><small>EXPENSE ENTRY</small><h2 id="entry-title">새 경비 등록</h2></div><span id="owner-badge" class="pill"></span></div>
     <form id="expense-form" class="panel form-grid">
@@ -221,7 +222,7 @@ const SB_KEY=window.Q7_SUPABASE_PUBLISHABLE_KEY||'';
 let token=sessionStorage.getItem('q7_token')||'',adminToken=sessionStorage.getItem('q7_admin_token')||'',who=sessionStorage.getItem('q7_who')||'';
 let state=null,outboxDb=null,photoData=null,photoUrl=null,submitting=false,flushing=false,currentTab='entry';
 const today=()=>{const d=new Date(),tz=d.getTimezoneOffset()*60000;return new Date(d.getTime()-tz).toISOString().slice(0,10);};
-function show(id){for(const section of ['loading','configure','login','first-pin-change','app'])$(section).hidden=section!==id;$('logout').hidden=id!=='app';}
+function show(id){for(const section of ['loading','configure','login','first-pin-change','app'])$(section).hidden=section!==id;$('logout').hidden=id!=='app';if(id==='app')switchTab('home');}
 let noticeTimer;function notice(message,bad=false){const el=$('notice');el.hidden=false;el.className=bad?'error':'';el.textContent=message;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>el.hidden=true,6500);}
 function connection(good,label){const x=$('online');x.className='connection '+(good?'good':'bad');x.textContent=label;}
 async function rpc(name,args){
@@ -278,7 +279,7 @@ async function boot(){try{
  }catch(e){show('login');notice('서버 상태를 확인하지 못했습니다: '+e.message,true);}}
 function populateMembers(members=allMembers){for(const id of ['login-member','edit-owner','pin-member','account-target'])$(id).innerHTML=members.map(m=>`<option value="${escapeHtml(m.id)}">${escapeHtml(m.name)}</option>`).join('');$('expense-debtor').innerHTML=members.map(m=>`<option value="${escapeHtml(m.id)}">${escapeHtml(m.name)}</option>`).join('');$('login-member').value='moon_hw';$('expense-date').value=today();}
 function welcome(){$('welcome').textContent=name(who);$('owner-badge').textContent=`결제자 · ${name(who)}`;$('edit-owner').value=who;$('admin-unlock').hidden=who!=='moon_hw';$('admin-tools').hidden=!(who==='moon_hw'&&adminToken);$('account-target-row').hidden=!adminToken;}
-function switchTab(tab){currentTab=tab;document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));document.querySelectorAll('.tab-panel').forEach(el=>el.hidden=el.id!==`tab-${tab}`);}
+function switchTab(tab){currentTab=tab;document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));document.querySelectorAll('.tab-panel').forEach(el=>el.hidden=el.id!=='tab-'+tab);document.querySelectorAll('.subview').forEach(el=>el.hidden=tab==='home'||tab==='trip-summary');}
 function currentSum(){return E.summarize((state?.records||[]).filter(r=>!r.deleted),{opening:state?.config?.opening||0,rate:state?.config?.rate||0,refundedIds:state?.config?.refundedIds||[]});}
 function render(){if(!state)return;welcome();const s=currentSum();$('pending-total').textContent=money(s.pendingTotal);$('pool-balance').textContent=money(s.poolBalance);$('personal-total').textContent=money(s.transfers.reduce((v,t)=>v+t.krw,0));$('record-count').textContent=`${state.records.filter(x=>!x.deleted).length}건`;
  $('pool-opening').value=state.config.opening||0;$('pool-rate').value=state.config.rate||0;
@@ -385,7 +386,7 @@ function tsInit(){try{const v=JSON.parse(localStorage.getItem('q7_trip_report_v2
  tsPreview();for(const k of TS_KEYS)$('ts-'+k).addEventListener('input',tsPreview);for(const k of Object.keys(TS_LABELS))$('ts-note-'+k).addEventListener('input',tsPreview);
  $('ts-form').onsubmit=e=>{e.preventDefault();if(!$('ts-closing').value)return notice('공통통장 최종 잔액을 입력하세요.',true);tsPdf();};
 }
-function bind(){tsInit();
+function bind(){tsInit();document.querySelectorAll('[data-home-target]').forEach(el=>el.onclick=()=>switchTab(el.dataset.homeTarget));$('q7-back-home').onclick=()=>switchTab('home');
   $('login-form').onsubmit=async ev=>{ev.preventDefault();try{const v=await request('/api/login',{method:'POST',needAuth:false,body:{memberId:$('login-member').value,pin:$('login-pin').value}});token=v.token;who=v.memberId;sessionStorage.setItem('q7_token',token);sessionStorage.setItem('q7_who',who);$('login-pin').value='';adminToken='';sessionStorage.removeItem('q7_admin_token');if(v.mustChangePin){show('first-pin-change');notice('새 숫자 4자리 비밀번호를 먼저 설정하세요.');return;}await sync();welcome();show('app');fillAccount();await flushOutbox();await sync();}catch(e){notice(e.message,true);}};
  $('first-pin-form').onsubmit=async ev=>{ev.preventDefault();const a=$('first-new-pin').value,b=$('first-confirm-pin').value;if(!/^[0-9]{4}$/.test(a)||a==='1111'||a!==b){notice('1111이 아닌 숫자 4자리로 동일하게 입력하세요.',true);return;}try{await request('/api/change-password',{method:'POST',body:{oldPin:$('first-old-pin').value,nextPin:a}});$('first-pin-form').reset();token='';who='';adminToken='';sessionStorage.removeItem('q7_token');sessionStorage.removeItem('q7_who');sessionStorage.removeItem('q7_admin_token');show('login');notice('비밀번호 변경 완료. 새 비밀번호로 로그인하세요.');}catch(e){notice(e.message,true);}};
  $('logout').onclick=()=>{token='';who='';adminToken='';sessionStorage.removeItem('q7_token');sessionStorage.removeItem('q7_admin_token');sessionStorage.removeItem('q7_who');state=null;show('login');connection(false,'로그아웃');};
