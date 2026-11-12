@@ -233,7 +233,7 @@ let noticeTimer;function notice(message,bad=false){const el=$('notice');el.hidde
 function connection(good,label){const x=$('online');x.className='connection '+(good?'good':'bad');x.textContent=label;}
 async function rpc(name,args){
  let res;
- try{res=await fetch(SB_URL+'/rest/v1/rpc/'+name,{method:'POST',headers:{
+ try{res=await fetch(SB_URL+'/rest/v1/rpc/'+name,{method:'POST',signal:AbortSignal.timeout(10000),headers:{
   'Content-Type':'application/json','apikey':SB_KEY,'Accept':'application/json'
  },body:JSON.stringify(args),cache:'no-store'});}catch{
   connection(false,'오프라인');throw Error('Supabase에 연결할 수 없습니다. 인터넷 및 config.js 설정을 확인하세요.');
@@ -277,7 +277,7 @@ async function flushOutbox(){if(flushing||!token)return;flushing=true;try{for(co
  }
  await updateOutbox();}finally{flushing=false;}}
 async function boot(){try{
- await openOutbox();if(!SB_URL||!SB_KEY||SB_URL.includes('YOURPROJECT')||SB_KEY.includes('YOUR_PUBLISHABLE')){show('configure');$('cfg-example').textContent='config.js에 SUPABASE_URL 및 PUBLISHABLE_KEY 입력';return;}
+ await Promise.race([openOutbox(),new Promise((_,reject)=>setTimeout(()=>reject(Error('로컬 저장소 응답 지연')),6000))]);if(!SB_URL||!SB_KEY||SB_URL.includes('YOURPROJECT')||SB_KEY.includes('YOUR_PUBLISHABLE')){show('configure');$('cfg-example').textContent='config.js에 SUPABASE_URL 및 PUBLISHABLE_KEY 입력';return;}
  const st=await request('/api/status',{needAuth:false});
  populateMembers(st.members);if(!st.initialized){show('configure');$('cfg-example').textContent='Supabase SQL Editor: select private.q7_bootstrap(...)';return;}
  if(token&&who){try{const v=await request('/api/session-status');if(v.mustChangePin){show('first-pin-change');return;}await sync();welcome();show('app');fillAccount();await flushOutbox();await sync();return;}catch{token='';who='';sessionStorage.clear();}}
@@ -372,7 +372,7 @@ async function fullBackup(){
  return content;
 }
 function download(content,filename){const blob=new Blob([JSON.stringify(content,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);}
-const TS_KEYS=['opening','flight','car','museum','alipay','cho-alipay','kwon-parking','han-parking','refund''];
+const TS_KEYS=['opening','flight','car','museum','alipay','cho-alipay','kwon-parking','han-parking','refund'];
 const TS_LABELS={opening:'공통통장 최초금액',flight:'항공권 + 호텔비',car:'전용차량 3건',museum:'맥주박물관 7명',alipay:'문호원 알리페이','cho-alipay':'조동현 알리페이','kwon-parking':'권오성 주차비','han-parking':'한대희 주차비',refund:'문호원 환급 합계'};
 function tsFormatMoney(input){if(!input)return;const raw=input.value.replace(/[^0-9]/g,'');input.value=raw?Number(raw).toLocaleString('ko-KR'):'';}
 function tsNumber(input){return input.value.trim()===''?null:Number(input.value.replace(/,/g,''));}
