@@ -28,15 +28,15 @@
 <section id="configure" class="panel center-box" hidden><h2>Supabase 연결 설정</h2><p>GitHub Pages 화면은 준비됐습니다. Supabase SQL 초기화 후 <code>config.js</code>에 프로젝트 URL과 공개 키를 설정해 주세요.</p><code id="cfg-example"></code></section>
 <section id="login" class="panel center-box" hidden>
   <span class="eyebrow">7 PERSON SETTLEMENT</span><h2>이름으로 로그인</h2>
-  <p class="muted">초기 암호는 본인 휴대전화 뒷번호 4자리입니다.</p>
+  <p class="muted">7명 공통 최초 비밀번호는 <strong>1111</strong>입니다. 첫 로그인 후 숫자 4자리로 반드시 변경합니다.</p>
   <form id="login-form" class="form-grid">
     <label>내 이름 <select id="login-member" required></select></label>
-    <label>비밀번호 <input id="login-pin" type="password" inputmode="numeric" minlength="4" maxlength="12" required autocomplete="current-password" placeholder="최초 접속: 전화번호 뒷 4자리"></label>
+    <label>비밀번호 <input id="login-pin" type="password" inputmode="numeric" minlength="4" maxlength="12" required autocomplete="current-password" placeholder="최초 접속: 1111"></label>
     <button class="primary" type="submit">로그인</button>
   </form>
-  <p class="hint">아직 초기 번호가 등록되지 않았다면 문호원에게 요청해 주세요.</p>
+  <p class="hint">변경 전에는 경비정산 화면을 사용할 수 없습니다.</p>
 </section>
-<main id="app" hidden>
+<section id="first-pin-change" class="panel center-box" hidden><h2>첫 로그인 · 비밀번호 변경 필수</h2><p class="muted">새 비밀번호를 숫자 4자리로 설정하세요. 1111은 사용할 수 없습니다.</p><form id="first-pin-form" class="form-grid"><label>현재 비밀번호 <input id="first-old-pin" type="password" inputmode="numeric" minlength="4" maxlength="4" pattern="[0-9]{4}" required placeholder="1111"></label><label>새 비밀번호 (숫자 4자리) <input id="first-new-pin" type="password" inputmode="numeric" minlength="4" maxlength="4" pattern="[0-9]{4}" required></label><label>새 비밀번호 확인 <input id="first-confirm-pin" type="password" inputmode="numeric" minlength="4" maxlength="4" pattern="[0-9]{4}" required></label><button class="primary" type="submit">변경하고 다시 로그인</button></form></section><main id="app" hidden>
   <section class="hero"><div><small>SHARED ACCOUNTING</small><h2><span id="welcome"></span>님, 반갑습니다.</h2><p>모든 경비는 Supabase의 비공개 JSON 데이터로 함께 저장됩니다.</p></div><button id="sync" class="secondary" type="button">↻ 동기화</button></section>
   <div class="summary-grid">
     <article class="stat"><small>공통통장 환급 대기</small><strong id="pending-total">0원</strong><span>공통통장 → 개인</span></article>
@@ -66,14 +66,14 @@
   <section id="tab-settlement" class="tab-panel" hidden><div class="section-heading"><div><small>SETTLEMENT</small><h2>누가 누구에게 보내나요?</h2></div></div><h3>공통통장 → 개인 환급</h3><div id="refund-list" class="stack"></div><h3>개인 간 송금</h3><div id="transfer-list" class="stack"></div><div id="warnings" class="warn"></div></section>
   <section id="tab-admin" class="tab-panel" hidden>
     <div class="section-heading"><div><small>SECURITY & DATA</small><h2>설정 및 백업</h2></div></div>
-    <article class="panel"><h3>내 비밀번호 변경</h3><form id="password-form" class="form-grid"><label>현재 비밀번호 <input id="old-pin" type="password" required></label><label>새 비밀번호 (숫자 6~12자리) <input id="new-pin" type="password" inputmode="numeric" minlength="6" maxlength="12" pattern="[0-9]{6,12}" required></label><button class="secondary" type="submit">비밀번호 변경</button></form></article>
+    <article class="panel"><h3>내 비밀번호 변경</h3><form id="password-form" class="form-grid"><label>현재 비밀번호 <input id="old-pin" type="password" required></label><label>새 비밀번호 (숫자 4자리) <input id="new-pin" type="password" inputmode="numeric" minlength="4" maxlength="4" pattern="[0-9]{4}" required></label><button class="secondary" type="submit">비밀번호 변경</button></form></article>
     <article class="panel"><h3>내 환급 계좌 등록</h3><p class="hint">최초 등록은 본인이 할 수 있고 기존 정보 수정은 문호원 관리자만 가능합니다. 계좌 정보는 로그인한 여행 참가자에게만 표시됩니다. (4자리 PIN은 보안이 약하므로 빠른 변경 권장)</p>
       <form id="account-form" class="form-grid"><label id="account-target-row" hidden>계좌 명의자 <select id="account-target"></select></label><label>은행명 <input id="account-bank" maxlength="70" placeholder="예: 국민은행" required></label><label>예금주 <input id="account-holder" maxlength="70" required></label><label>계좌번호 <input id="account-number" maxlength="60" inputmode="numeric" placeholder="숫자 또는 하이픈" required></label><button class="secondary" id="account-submit" type="submit">내 계좌 저장</button></form>
       <div id="all-accounts" class="hint"></div>
     </article>
     <article id="admin-unlock" class="panel" hidden><h3>문호원 관리자 모드</h3><p class="hint">기존 기록 수정·삭제, 환급 완료, 계정 초기번호 변경은 관리자만 가능합니다.</p><form id="admin-form" class="inline-form"><input id="admin-password" type="password" placeholder="관리자 별도 암호" required><button class="primary" type="submit">관리자 잠금 해제</button></form></article>
     <div id="admin-tools" hidden>
-      <article class="panel"><h3>7명 초기 비밀번호 등록·초기화</h3><p class="hint">확인된 전화번호 뒷자리만 입력하세요. 이 작업은 해당 사용자의 이전 로그인 비밀번호를 무효화합니다.</p><form id="pin-form" class="inline-form"><select id="pin-member"></select><input id="pin-value" type="password" inputmode="numeric" minlength="4" maxlength="4" pattern="[0-9]{4}" placeholder="전화번호 뒷 4자리" required><button class="secondary" type="submit">설정</button></form><div id="pin-status" class="hint"></div></article>
+      <article class="panel"><h3>7명 초기 비밀번호 등록·초기화</h3><p class="hint">각 참가자의 초기 비밀번호는 1111입니다. 참가자가 첫 로그인 시 직접 새 번호로 변경합니다.</p><form id="pin-form" class="inline-form"><select id="pin-member"></select><input id="pin-value" type="password" inputmode="numeric" minlength="4" maxlength="4" pattern="[0-9]{4}" placeholder="숫자 4자리" required><button class="secondary" type="submit">설정</button></form><div id="pin-status" class="hint"></div></article>
       <article class="panel"><h3>공통통장 설정</h3><form id="pool-form" class="inline-form"><label>시작 잔액 (원)<input id="pool-opening" type="number" min="0" step="1" required></label><label>위안 1 CNY 환율 (원)<input id="pool-rate" type="number" min="0" step="0.01" required></label><button class="secondary" type="submit">저장</button></form></article>
       <article class="panel"><h3>기존 v2~v9 JSON 가져오기</h3><p class="hint">사진도 Supabase에 업로드하고, 같은 ID는 중복 저장하지 않습니다. 기존 파일에 포함된 사용자 비밀번호는 가져오지 않습니다.</p><input id="import-file" type="file" accept=".json,application/json"><button id="import-button" class="secondary" type="button">선택한 JSON 통합</button><p id="import-progress" class="hint"></p></article>
       <article class="panel"><h3>전체 데이터 백업</h3><p class="hint">전체 경비·계좌·정산 상태와 첨부 사진까지 하나의 JSON 파일로 다운로드합니다. 민감한 정보가 포함되므로 안전하게 보관하세요.</p><button id="export-button" class="secondary" type="button">전체 정산 JSON 다운로드</button></article>
@@ -183,7 +183,7 @@ const SB_KEY=window.Q7_SUPABASE_PUBLISHABLE_KEY||'';
 let token=sessionStorage.getItem('q7_token')||'',adminToken=sessionStorage.getItem('q7_admin_token')||'',who=sessionStorage.getItem('q7_who')||'';
 let state=null,outboxDb=null,photoData=null,photoUrl=null,submitting=false,flushing=false,currentTab='entry';
 const today=()=>{const d=new Date(),tz=d.getTimezoneOffset()*60000;return new Date(d.getTime()-tz).toISOString().slice(0,10);};
-function show(id){for(const section of ['loading','configure','login','app'])$(section).hidden=section!==id;$('logout').hidden=id!=='app';}
+function show(id){for(const section of ['loading','configure','login','first-pin-change','app'])$(section).hidden=section!==id;$('logout').hidden=id!=='app';}
 let noticeTimer;function notice(message,bad=false){const el=$('notice');el.hidden=false;el.className=bad?'error':'';el.textContent=message;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>el.hidden=true,6500);}
 function connection(good,label){const x=$('online');x.className='connection '+(good?'good':'bad');x.textContent=label;}
 async function rpc(name,args){
@@ -234,7 +234,7 @@ async function boot(){try{
  await openOutbox();if(!SB_URL||!SB_KEY||SB_URL.includes('YOURPROJECT')||SB_KEY.includes('YOUR_PUBLISHABLE')){show('configure');$('cfg-example').textContent='config.js에 SUPABASE_URL 및 PUBLISHABLE_KEY 입력';return;}
  const st=await request('/api/status',{needAuth:false});
  populateMembers(st.members);if(!st.initialized){show('configure');$('cfg-example').textContent='Supabase SQL Editor: select private.q7_bootstrap(...)';return;}
- if(token&&who){try{await sync();welcome();show('app');fillAccount();await flushOutbox();await sync();return;}catch{token='';who='';sessionStorage.clear();}}
+ if(token&&who){try{const v=await request('/api/session-status');if(v.mustChangePin){show('first-pin-change');return;}await sync();welcome();show('app');fillAccount();await flushOutbox();await sync();return;}catch{token='';who='';sessionStorage.clear();}}
  show('login');
  }catch(e){show('login');notice('서버 상태를 확인하지 못했습니다: '+e.message,true);}}
 function populateMembers(members=allMembers){for(const id of ['login-member','edit-owner','pin-member','account-target'])$(id).innerHTML=members.map(m=>`<option value="${escapeHtml(m.id)}">${escapeHtml(m.name)}</option>`).join('');$('expense-debtor').innerHTML=members.map(m=>`<option value="${escapeHtml(m.id)}">${escapeHtml(m.name)}</option>`).join('');$('expense-date').value=today();}
@@ -327,7 +327,8 @@ async function fullBackup(){
 }
 function download(content,filename){const blob=new Blob([JSON.stringify(content,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);}
 function bind(){
-  $('login-form').onsubmit=async ev=>{ev.preventDefault();try{const v=await request('/api/login',{method:'POST',needAuth:false,body:{memberId:$('login-member').value,pin:$('login-pin').value}});token=v.token;who=v.memberId;sessionStorage.setItem('q7_token',token);sessionStorage.setItem('q7_who',who);$('login-pin').value='';adminToken='';sessionStorage.removeItem('q7_admin_token');await sync();welcome();show('app');fillAccount();await flushOutbox();await sync();}catch(e){notice(e.message,true);}};
+  $('login-form').onsubmit=async ev=>{ev.preventDefault();try{const v=await request('/api/login',{method:'POST',needAuth:false,body:{memberId:$('login-member').value,pin:$('login-pin').value}});token=v.token;who=v.memberId;sessionStorage.setItem('q7_token',token);sessionStorage.setItem('q7_who',who);$('login-pin').value='';adminToken='';sessionStorage.removeItem('q7_admin_token');if(v.mustChangePin){show('first-pin-change');notice('새 숫자 4자리 비밀번호를 먼저 설정하세요.');return;}await sync();welcome();show('app');fillAccount();await flushOutbox();await sync();}catch(e){notice(e.message,true);}};
+ $('first-pin-form').onsubmit=async ev=>{ev.preventDefault();const a=$('first-new-pin').value,b=$('first-confirm-pin').value;if(!/^[0-9]{4}$/.test(a)||a==='1111'||a!==b){notice('1111이 아닌 숫자 4자리로 동일하게 입력하세요.',true);return;}try{await request('/api/change-password',{method:'POST',body:{oldPin:$('first-old-pin').value,nextPin:a}});$('first-pin-form').reset();token='';who='';adminToken='';sessionStorage.removeItem('q7_token');sessionStorage.removeItem('q7_who');sessionStorage.removeItem('q7_admin_token');show('login');notice('비밀번호 변경 완료. 새 비밀번호로 로그인하세요.');}catch(e){notice(e.message,true);}};
  $('logout').onclick=()=>{token='';who='';adminToken='';sessionStorage.removeItem('q7_token');sessionStorage.removeItem('q7_admin_token');sessionStorage.removeItem('q7_who');state=null;show('login');connection(false,'로그아웃');};
  $('sync').onclick=()=>sync().then(()=>flushOutbox()).then(()=>sync()).then(()=>notice('✓ 다른 사람의 경비까지 최신 상태로 동기화했습니다.')).catch(e=>notice(e.message,true));
  $('retry-outbox').onclick=()=>flushOutbox().then(sync).catch(e=>notice(e.message,true));
