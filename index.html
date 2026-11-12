@@ -94,6 +94,7 @@
  <tr><td>항공권 + 호텔비</td><td><input id="ts-flight" type="text" inputmode="numeric" value="2,359,380" required></td><td><input id="ts-note-flight" value="공통통장 → 문호원 지급 내역"></td></tr>
  <tr><td>전용차량 3건</td><td><input id="ts-car" type="text" inputmode="numeric" value="472,860" required></td><td><input id="ts-note-car" value="문호원 선결제 · 환급 세부내역"></td></tr>
  <tr><td>맥주박물관 7명</td><td><input id="ts-museum" type="text" inputmode="numeric" value="85,009" required></td><td><input id="ts-note-museum" value="문호원 선결제 · 환급 세부내역"></td></tr>
+ <tr><td>문호원 알리페이</td><td><input id="ts-alipay" type="text" inputmode="numeric" value="1,226,794" required></td><td><input id="ts-note-alipay" value="문호원 알리페이 결제 · 공통통장 환급 검토"></td></tr>
  <tr class="ts-emphasis"><td><b>문호원 환급 합계</b></td><td><input id="ts-refund" type="text" inputmode="numeric" value="557,869" required></td><td><input id="ts-note-refund" value="공통통장 → 문호원 입금 필요"></td></tr>
  <tr><td>공통통장 최종 잔액</td><td><input id="ts-closing" type="text" inputmode="numeric" placeholder="미입력" required></td><td><input id="ts-note-closing" value="실제 최종 잔액 입력 필요"></td></tr>
  </tbody></table></div>
@@ -366,9 +367,9 @@ async function fullBackup(){
  return content;
 }
 function download(content,filename){const blob=new Blob([JSON.stringify(content,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);}
-const TS_KEYS=['opening','flight','car','museum','refund','closing','notes'];
-const TS_LABELS={opening:'공통통장 최초금액',flight:'항공권 + 호텔비',car:'전용차량 3건',museum:'맥주박물관 7명',refund:'문호원 환급 합계',closing:'공통통장 최종 잔액'};
-const TS_DEFAULT_NOTES={opening:'공동경비 시작 잔액',flight:'공통통장 → 문호원 지급 내역',car:'문호원 선결제 · 환급 세부내역',museum:'문호원 선결제 · 환급 세부내역',refund:'공통통장 → 문호원 입금 필요',closing:'실제 최종 잔액 입력 필요'};
+const TS_KEYS=['opening','flight','car','museum','alipay','refund','closing','notes'];
+const TS_LABELS={opening:'공통통장 최초금액',flight:'항공권 + 호텔비',car:'전용차량 3건',museum:'맥주박물관 7명',alipay:'문호원 알리페이',refund:'문호원 환급 합계',closing:'공통통장 최종 잔액'};
+const TS_DEFAULT_NOTES={opening:'공동경비 시작 잔액',flight:'공통통장 → 문호원 지급 내역',car:'문호원 선결제 · 환급 세부내역',museum:'문호원 선결제 · 환급 세부내역',alipay:'문호원 알리페이 결제 · 공통통장 환급 검토',refund:'공통통장 → 문호원 입금 필요',closing:'실제 최종 잔액 입력 필요'};
 function tsFormatMoney(input){if(!input)return;const raw=input.value.replace(/[^0-9]/g,'');input.value=raw?Number(raw).toLocaleString('ko-KR'):'';}
 function tsNumber(input){return input.value.trim()===''?null:Number(input.value.replace(/,/g,''));}
 function tsValues(){const v={};for(const k of TS_KEYS)v[k]=k==='notes'?$('ts-'+k).value:tsNumber($('ts-'+k));v.rowNotes={};for(const k of Object.keys(TS_LABELS))v.rowNotes[k]=$('ts-note-'+k).value;return v;}
@@ -378,7 +379,7 @@ function tsPreview(){const v=tsValues(),hasClosing=v.closing!==null,spent=hasClo
 }
 function tsPdf(){const v=tsValues(),spent=v.opening-v.closing,other=spent-v.flight-v.refund;
  const lines=Object.keys(TS_LABELS).map(k=>[TS_LABELS[k],v[k],v.rowNotes[k]]);
- lines.push(['공통통장 사용액',spent,'최초금액 - 최종 잔액']);lines.push(['기타 지출·조정 차액',other,'입출금 내역 확인 필요']);
+ lines.push(['문호원 환급 검토 합계',v.refund+v.alipay,'기존 환급 + 알리페이 (지급 여부 별도 확인)']);lines.push(['공통통장 사용액',spent,'최초금액 - 최종 잔액']);lines.push(['기타 지출·조정 차액',other,'입출금 내역 확인 필요']);
  const w=window.open('','_blank');if(!w){notice('팝업을 허용한 뒤 다시 눌러주세요.',true);return;}
  const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const html='<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>칭다오 여행 종합정산</title><style>body{font-family:system-ui,"Noto Sans KR",sans-serif;color:#17243a;max-width:950px;margin:30px auto;padding:0 20px}h1{border-bottom:3px solid #237f70;padding-bottom:14px}table{border-collapse:collapse;width:100%;margin:24px 0}td,th{border-bottom:1px solid #ddd;padding:12px;text-align:left}td:nth-child(2){text-align:right;white-space:nowrap}.muted{color:#59687a;font-size:13px}.note{white-space:pre-wrap;background:#f3f6f8;padding:15px}@media print{button{display:none}body{margin:0;max-width:none}}@page{size:A4;margin:14mm}</style></head><body><h1>칭다오 여행 종합정산</h1><p class="muted">2026.11.09 ~ 11.11 · 7명 · 작성일 '+esc(new Date().toLocaleDateString('ko-KR'))+'</p><table><thead><tr><th>용도</th><th>금액 (원)</th><th>비고 · 입금 대상</th></tr></thead><tbody>'+lines.map(([k,n,note])=>'<tr><td>'+esc(k)+'</td><td>'+esc(money(n))+'</td><td>'+esc(note)+'</td></tr>').join('')+'</tbody></table><h3>추가 정산 메모</h3><div class="note">'+esc(v.notes||'별도 메모 없음')+'</div><p class="muted">※ 차량·박물관은 문호원 환급액 세부내역으로 중복 합산하지 않습니다. 기타 50,000원은 제외합니다. 실제 이체 여부는 확인 후 비고를 수정하세요.</p><button onclick="window.print()">PDF로 저장 / 인쇄</button></body></html>';
