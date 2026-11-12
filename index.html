@@ -200,6 +200,7 @@ async function rpc(name,args){
 }
 async function request(path,{method='GET',body=null,admin=false,needAuth=true}={}){
  if(path==='/api/status')return rpc('q7_status',{});
+ if(path==='/api/session-status')return rpc('q7_session_status',{p_token:token});
  if(path==='/api/login')return rpc('q7_login',{p_member_id:body.memberId,p_pin:body.pin});
  if(path==='/api/setup')throw Error('최초 생성은 Supabase SQL Editor에서 수행합니다. README를 확인하세요.');
  try{return await rpc('q7_call',{p_path:path,p_method:method,p_token:admin?adminToken:token,p_body:body||{}});}
