@@ -34,6 +34,7 @@
 .danger-button:disabled{opacity:.38;cursor:not-allowed}
 
 @media(min-width:900px){#tab-trip-summary{grid-column:1/-1}#tab-trip-summary>.panel{max-width:1000px;margin:auto}}
+.ts-scroll{width:100%;overflow-x:auto}.ts-table{width:100%;border-collapse:collapse;table-layout:fixed;min-width:540px}.ts-table th,.ts-table td{border-bottom:1px solid var(--edge);padding:12px 8px;text-align:left;vertical-align:middle}.ts-table th:nth-child(1){width:27%}.ts-table th:nth-child(2){width:25%}.ts-table th:nth-child(3){width:48%}.ts-table input{width:100%;min-width:0;font-size:14px;padding:12px 8px;box-sizing:border-box}.ts-emphasis{background:rgba(84,221,197,.1)}@media(max-width:600px){.ts-table{min-width:0;table-layout:fixed}.ts-table th,.ts-table td{padding:9px 3px;font-size:12px;overflow-wrap:anywhere}.ts-table th:nth-child(1){width:25%}.ts-table th:nth-child(2){width:30%}.ts-table th:nth-child(3){width:45%}.ts-table input{font-size:12px;padding:9px 4px}}
 </style>
 </head>
 <body>
@@ -85,15 +86,21 @@
   <section id="tab-settlement" class="tab-panel" hidden><div class="section-heading"><div><small>SETTLEMENT</small><h2>누가 누구에게 보내나요?</h2></div></div><h3>공통통장 → 개인 환급</h3><div id="refund-list" class="stack"></div><h3>개인 간 송금</h3><div id="transfer-list" class="stack"></div><div id="warnings" class="warn"></div></section>
   <section id="tab-trip-summary" class="tab-panel" hidden>
  <div class="section-heading"><div><small>QINGDAO · FINAL REPORT</small><h2>여행 종합정산</h2></div><span class="pill">7명 공동경비</span></div>
- <div class="panel"><p class="hint">확인된 금액을 미리 입력했습니다. 최종 잔액을 입력하고 PDF로 저장하세요. 입력값은 현재 브라우저에 임시 저장됩니다.</p>
+ <div class="panel"><p class="hint">용도별 금액과 입금 대상자를 확인하세요. 금액·비고는 직접 수정할 수 있으며, 최종 잔액을 입력하면 PDF 정산표를 만들 수 있습니다.</p>
  <form id="ts-form" class="form-grid">
- <div class="two-col"><label>공통통장 최초금액 (원)<input id="ts-opening" type="number" min="0" value="5307554" required></label><label>공통통장 최종 잔액 (원)<input id="ts-closing" type="number" min="0" placeholder="최종 잔액 입력" required></label></div>
- <div class="two-col"><label>항공권 + 호텔비 (원)<input id="ts-flight" type="number" min="0" value="2359380" required></label><label>공통통장 → 문호원 환급 (원)<input id="ts-refund" type="number" min="0" value="557869" required></label></div>
- <div class="two-col"><label>전용차량 3건 (원)<input id="ts-car" type="number" min="0" value="472860" required></label><label>맥주박물관 7명 (원)<input id="ts-museum" type="number" min="0" value="85009" required></label></div>
- 
- <label>기타 정산 내용<textarea id="ts-notes" rows="3" placeholder="추가 입출금, 미정산 항목, 확인사항"></textarea></label>
+ <div class="ts-scroll"><table class="ts-table"><thead><tr><th>용도</th><th>금액 (원)</th><th>비고 · 입금 대상</th></tr></thead><tbody>
+ <tr><td>공통통장 최초금액</td><td><input id="ts-opening" type="number" min="0" value="5307554" required></td><td><input id="ts-note-opening" value="공동경비 시작 잔액"></td></tr>
+ <tr><td>항공권 + 호텔비</td><td><input id="ts-flight" type="number" min="0" value="2359380" required></td><td><input id="ts-note-flight" value="공통통장 → 문호원 지급 내역"></td></tr>
+ <tr><td>전용차량 3건</td><td><input id="ts-car" type="number" min="0" value="472860" required></td><td><input id="ts-note-car" value="문호원 선결제 · 환급 세부내역"></td></tr>
+ <tr><td>맥주박물관 7명</td><td><input id="ts-museum" type="number" min="0" value="85009" required></td><td><input id="ts-note-museum" value="문호원 선결제 · 환급 세부내역"></td></tr>
+ <tr class="ts-emphasis"><td><b>문호원 환급 합계</b></td><td><input id="ts-refund" type="number" min="0" value="557869" required></td><td><input id="ts-note-refund" value="공통통장 → 문호원 입금 필요"></td></tr>
+ <tr><td>공통통장 최종 잔액</td><td><input id="ts-closing" type="number" min="0" placeholder="미입력" required></td><td><input id="ts-note-closing" value="실제 최종 잔액 입력 필요"></td></tr>
+ </tbody></table></div>
+ <p class="hint">※ 전용차량과 박물관 금액은 환급액 557,869원의 세부내역으로, 총지출에 다시 더하지 않습니다. 기타 50,000원은 제외했습니다.</p>
+ <label>추가 정산 메모<textarea id="ts-notes" rows="2" placeholder="추가 정산 확인사항"></textarea></label>
  <div id="ts-preview" class="panel" aria-live="polite"></div>
- <button class="primary" type="submit">PDF 정산보고서 만들기</button></form></div>
+ <button class="primary" type="submit">종합정산표 PDF 저장 / 인쇄</button>
+ </form></div>
  </section>
  <section id="tab-admin" class="tab-panel" hidden>
     <div class="section-heading"><div><small>SECURITY & DATA</small><h2>설정 및 백업</h2></div></div>
@@ -358,20 +365,26 @@ async function fullBackup(){
  return content;
 }
 function download(content,filename){const blob=new Blob([JSON.stringify(content,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);}
-const TS_KEYS=['opening','closing','flight','refund','car','museum','notes'];
-function tsValues(){const v={};for(const k of TS_KEYS)v[k]=k==='notes'?$('ts-'+k).value:Number($('ts-'+k).value||0);return v;}
-function tsPreview(){const v=tsValues(),spent=v.opening-v.closing,other=spent-v.flight-v.refund;
- $('ts-preview').innerHTML='<h3>정산 미리보기</h3><p>통장 기준 총 사용액: <b>'+money(spent)+'</b></p><p>항공권·호텔비: <b>'+money(v.flight)+'</b></p><p>문호원 환급 예정: <b>'+money(v.refund)+'</b></p><p>기타 지출 및 조정 차액: <b>'+money(other)+'</b></p><p class="hint">'+(v.car+v.museum===v.refund?'✓ 차량 + 박물관 합계와 환급액 일치':'⚠ 차량 + 박물관 합계와 환급액 불일치')+' · 문호원 환급액은 별도 지출로 중복 합산하지 않습니다.</p>';
- try{localStorage.setItem('q7_trip_report_v1',JSON.stringify(v));}catch{}
+const TS_KEYS=['opening','flight','car','museum','refund','closing','notes'];
+const TS_LABELS={opening:'공통통장 최초금액',flight:'항공권 + 호텔비',car:'전용차량 3건',museum:'맥주박물관 7명',refund:'문호원 환급 합계',closing:'공통통장 최종 잔액'};
+const TS_DEFAULT_NOTES={opening:'공동경비 시작 잔액',flight:'공통통장 → 문호원 지급 내역',car:'문호원 선결제 · 환급 세부내역',museum:'문호원 선결제 · 환급 세부내역',refund:'공통통장 → 문호원 입금 필요',closing:'실제 최종 잔액 입력 필요'};
+function tsValues(){const v={};for(const k of TS_KEYS)v[k]=k==='notes'?$('ts-'+k).value:($('ts-'+k).value===''?null:Number($('ts-'+k).value));v.rowNotes={};for(const k of Object.keys(TS_LABELS))v.rowNotes[k]=$('ts-note-'+k).value;return v;}
+function tsPreview(){const v=tsValues(),hasClosing=v.closing!==null,spent=hasClosing?v.opening-v.closing:null,other=hasClosing?spent-v.flight-v.refund:null;
+ $('ts-preview').innerHTML='<h3>종합정산 요약</h3><p>공통통장 사용액: <b>'+(hasClosing?money(spent):'최종 잔액 입력 필요')+'</b></p><p>문호원 입금 필요: <b>'+money(v.refund)+'</b></p><p>기타 지출·조정 차액: <b>'+(hasClosing?money(other):'미확정')+'</b></p><p class="hint">'+(v.car+v.museum===v.refund?'✓ 차량 + 박물관 합계와 환급액 일치':'⚠ 환급액과 세부내역 불일치')+' · 입금 완료 여부는 비고에서 수정하세요.</p>';
+ try{localStorage.setItem('q7_trip_report_v2',JSON.stringify(v));}catch{}
 }
 function tsPdf(){const v=tsValues(),spent=v.opening-v.closing,other=spent-v.flight-v.refund;
- const lines=[['공통통장 최초금액',v.opening],['공통통장 최종 잔액',v.closing],['통장 기준 총 사용액',spent],['항공권 및 호텔비',v.flight],['전용차량 3건 (환급 세부내역)',v.car],['맥주박물관 7명 (환급 세부내역)',v.museum],['공통통장 → 문호원 환급 예정',v.refund],['기타 지출·조정 차액',other]];
+ const lines=Object.keys(TS_LABELS).map(k=>[TS_LABELS[k],v[k],v.rowNotes[k]]);
+ lines.push(['공통통장 사용액',spent,'최초금액 - 최종 잔액']);lines.push(['기타 지출·조정 차액',other,'입출금 내역 확인 필요']);
  const w=window.open('','_blank');if(!w){notice('팝업을 허용한 뒤 다시 눌러주세요.',true);return;}
- const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- const html='<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>칭다오 여행 종합정산</title><style>body{font-family:system-ui,"Noto Sans KR",sans-serif;color:#17243a;max-width:820px;margin:30px auto;padding:0 20px}h1{border-bottom:3px solid #237f70;padding-bottom:14px}table{border-collapse:collapse;width:100%;margin:24px 0}td,th{border-bottom:1px solid #ddd;padding:12px;text-align:left}td:last-child{text-align:right}.muted{color:#59687a;font-size:13px}.note{white-space:pre-wrap;background:#f3f6f8;padding:15px}@media print{button{display:none}body{margin:0;max-width:none}}@page{size:A4;margin:16mm}</style></head><body><h1>칭다오 여행 종합정산</h1><p class="muted">2026.11.09 ~ 11.11 · 여행 인원 7명 · 작성일 '+esc(new Date().toLocaleDateString('ko-KR'))+'</p><table><thead><tr><th>항목</th><th>금액 (원)</th></tr></thead><tbody>'+lines.map(([k,n])=>'<tr><td>'+esc(k)+'</td><td>'+esc(money(n))+'</td></tr>').join('')+'</tbody></table><h3>추가 정산 메모</h3><div class="note">'+esc(v.notes||'별도 메모 없음')+'</div><p class="muted">※ 전용차량·박물관 비용은 문호원 환급액의 세부내역입니다. 중복 합산하지 않습니다. 기타 차액은 실제 입출금 내역 확인이 필요합니다.</p><button onclick="window.print()">PDF로 저장 / 인쇄</button></body></html>';
+ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const html='<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>칭다오 여행 종합정산</title><style>body{font-family:system-ui,"Noto Sans KR",sans-serif;color:#17243a;max-width:950px;margin:30px auto;padding:0 20px}h1{border-bottom:3px solid #237f70;padding-bottom:14px}table{border-collapse:collapse;width:100%;margin:24px 0}td,th{border-bottom:1px solid #ddd;padding:12px;text-align:left}td:nth-child(2){text-align:right;white-space:nowrap}.muted{color:#59687a;font-size:13px}.note{white-space:pre-wrap;background:#f3f6f8;padding:15px}@media print{button{display:none}body{margin:0;max-width:none}}@page{size:A4;margin:14mm}</style></head><body><h1>칭다오 여행 종합정산</h1><p class="muted">2026.11.09 ~ 11.11 · 7명 · 작성일 '+esc(new Date().toLocaleDateString('ko-KR'))+'</p><table><thead><tr><th>용도</th><th>금액 (원)</th><th>비고 · 입금 대상</th></tr></thead><tbody>'+lines.map(([k,n,note])=>'<tr><td>'+esc(k)+'</td><td>'+esc(money(n))+'</td><td>'+esc(note)+'</td></tr>').join('')+'</tbody></table><h3>추가 정산 메모</h3><div class="note">'+esc(v.notes||'별도 메모 없음')+'</div><p class="muted">※ 차량·박물관은 문호원 환급액 세부내역으로 중복 합산하지 않습니다. 기타 50,000원은 제외합니다. 실제 이체 여부는 확인 후 비고를 수정하세요.</p><button onclick="window.print()">PDF로 저장 / 인쇄</button></body></html>';
  w.document.open();w.document.write(html);w.document.close();w.focus();
 }
-function tsInit(){try{const v=JSON.parse(localStorage.getItem('q7_trip_report_v1')||'{}');for(const k of TS_KEYS)if(v[k]!==undefined)$('ts-'+k).value=v[k];}catch{}tsPreview();for(const k of TS_KEYS)$('ts-'+k).addEventListener('input',tsPreview);$('ts-form').onsubmit=e=>{e.preventDefault();if(!$('ts-closing').value)return notice('공통통장 최종 잔액을 입력하세요.',true);tsPdf();};}
+function tsInit(){try{const v=JSON.parse(localStorage.getItem('q7_trip_report_v2')||'{}');for(const k of TS_KEYS)if(v[k]!==undefined&&v[k]!==null)$('ts-'+k).value=v[k];for(const k of Object.keys(TS_LABELS))if(v.rowNotes?.[k]!==undefined)$('ts-note-'+k).value=v.rowNotes[k];}catch{}
+ tsPreview();for(const k of TS_KEYS)$('ts-'+k).addEventListener('input',tsPreview);for(const k of Object.keys(TS_LABELS))$('ts-note-'+k).addEventListener('input',tsPreview);
+ $('ts-form').onsubmit=e=>{e.preventDefault();if(!$('ts-closing').value)return notice('공통통장 최종 잔액을 입력하세요.',true);tsPdf();};
+}
 function bind(){tsInit();
   $('login-form').onsubmit=async ev=>{ev.preventDefault();try{const v=await request('/api/login',{method:'POST',needAuth:false,body:{memberId:$('login-member').value,pin:$('login-pin').value}});token=v.token;who=v.memberId;sessionStorage.setItem('q7_token',token);sessionStorage.setItem('q7_who',who);$('login-pin').value='';adminToken='';sessionStorage.removeItem('q7_admin_token');if(v.mustChangePin){show('first-pin-change');notice('새 숫자 4자리 비밀번호를 먼저 설정하세요.');return;}await sync();welcome();show('app');fillAccount();await flushOutbox();await sync();}catch(e){notice(e.message,true);}};
  $('first-pin-form').onsubmit=async ev=>{ev.preventDefault();const a=$('first-new-pin').value,b=$('first-confirm-pin').value;if(!/^[0-9]{4}$/.test(a)||a==='1111'||a!==b){notice('1111이 아닌 숫자 4자리로 동일하게 입력하세요.',true);return;}try{await request('/api/change-password',{method:'POST',body:{oldPin:$('first-old-pin').value,nextPin:a}});$('first-pin-form').reset();token='';who='';adminToken='';sessionStorage.removeItem('q7_token');sessionStorage.removeItem('q7_who');sessionStorage.removeItem('q7_admin_token');show('login');notice('비밀번호 변경 완료. 새 비밀번호로 로그인하세요.');}catch(e){notice(e.message,true);}};
