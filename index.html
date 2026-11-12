@@ -364,7 +364,7 @@ function tsPreview(){const v=tsValues(),spent=v.opening-v.closing,other=spent-v.
  $('ts-preview').innerHTML='<h3>정산 미리보기</h3><p>통장 기준 총 사용액: <b>'+money(spent)+'</b></p><p>항공권·호텔비: <b>'+money(v.flight)+'</b></p><p>문호원 환급 예정: <b>'+money(v.refund)+'</b></p><p>기타 지출 및 조정 차액: <b>'+money(other)+'</b></p><p class="hint">'+(v.car+v.museum===v.refund?'✓ 차량 + 박물관 합계와 환급액 일치':'⚠ 차량 + 박물관 합계와 환급액 불일치')+' · 문호원 환급액은 별도 지출로 중복 합산하지 않습니다.</p>';
  try{localStorage.setItem('q7_trip_report_v1',JSON.stringify(v));}catch{}
 }
-function tsPdf(){const v=tsValues(),spent=v.opening+v.deposit-v.closing,other=spent-v.flight-v.refund;
+function tsPdf(){const v=tsValues(),spent=v.opening-v.closing,other=spent-v.flight-v.refund;
  const lines=[['공통통장 최초금액',v.opening],['공통통장 최종 잔액',v.closing],['통장 기준 총 사용액',spent],['항공권 및 호텔비',v.flight],['전용차량 3건 (환급 세부내역)',v.car],['맥주박물관 7명 (환급 세부내역)',v.museum],['공통통장 → 문호원 환급 예정',v.refund],['기타 지출·조정 차액',other]];
  const w=window.open('','_blank');if(!w){notice('팝업을 허용한 뒤 다시 눌러주세요.',true);return;}
  const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
