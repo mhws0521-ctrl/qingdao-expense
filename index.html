@@ -36,6 +36,7 @@
 @media(min-width:900px){#tab-trip-summary{grid-column:1/-1}#tab-trip-summary>.panel{max-width:1000px;margin:auto}}
 .ts-scroll{width:100%;overflow-x:auto}.ts-table{width:100%;border-collapse:collapse;table-layout:fixed;min-width:540px}.ts-table th,.ts-table td{border-bottom:1px solid var(--edge);padding:12px 8px;text-align:left;vertical-align:middle}.ts-table th:nth-child(1){width:55%}.ts-table th:nth-child(2){width:45%}.ts-table input{width:100%;min-width:0;font-size:14px;padding:12px 8px;box-sizing:border-box}.ts-emphasis{background:rgba(84,221,197,.1)}@media(max-width:600px){.ts-table{min-width:0;table-layout:fixed}.ts-table th,.ts-table td{padding:9px 3px;font-size:12px;overflow-wrap:anywhere}.ts-table th:nth-child(1){width:52%}.ts-table th:nth-child(2){width:48%}.ts-table input{font-size:12px;padding:9px 4px}}
 .q7-home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.q7-home-card{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:24px;padding:32px;min-height:220px;border-radius:20px;border:1px solid var(--edge);background:#173746;color:var(--text);cursor:pointer}.q7-home-card:nth-child(2){background:#253350}.q7-home-card strong{font-size:25px}.q7-home-card small{font-size:15px;line-height:1.6;color:var(--muted)}.q7-subnav{display:flex;align-items:center;gap:16px;margin:12px 0}[hidden]{display:none!important}@media(max-width:650px){.q7-home-grid{grid-template-columns:1fr}.q7-home-card{min-height:155px;padding:22px}}
+.ts-table tr[hidden]{display:none!important}.ts-delete{background:#5c2630;color:#fff;border:1px solid #9b5360;border-radius:7px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -282,7 +283,7 @@ async function boot(){try{
  show('login');
  }catch(e){show('login');notice('서버 상태를 확인하지 못했습니다: '+e.message,true);}}
 function populateMembers(members=allMembers){for(const id of ['login-member','edit-owner','pin-member','account-target'])$(id).innerHTML=members.map(m=>`<option value="${escapeHtml(m.id)}">${escapeHtml(m.name)}</option>`).join('');$('expense-debtor').innerHTML=members.map(m=>`<option value="${escapeHtml(m.id)}">${escapeHtml(m.name)}</option>`).join('');$('login-member').value='moon_hw';$('expense-date').value=today();}
-function welcome(){$('welcome').textContent=name(who);$('owner-badge').textContent=`결제자 · ${name(who)}`;$('edit-owner').value=who;$('admin-unlock').hidden=who!=='moon_hw';$('admin-tools').hidden=!(who==='moon_hw'&&adminToken);$('account-target-row').hidden=!adminToken;}
+function welcome(){tsApplyDeleted();$('welcome').textContent=name(who);$('owner-badge').textContent=`결제자 · ${name(who)}`;$('edit-owner').value=who;$('admin-unlock').hidden=who!=='moon_hw';$('admin-tools').hidden=!(who==='moon_hw'&&adminToken);$('account-target-row').hidden=!adminToken;}
 function switchTab(tab){currentTab=tab;document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));document.querySelectorAll('.tab-panel').forEach(el=>el.hidden=el.id!=='tab-'+tab);document.querySelectorAll('.subview').forEach(el=>el.hidden=tab==='home'||tab==='trip-summary');}
 function currentSum(){return E.summarize((state?.records||[]).filter(r=>!r.deleted),{opening:state?.config?.opening||0,rate:state?.config?.rate||0,refundedIds:state?.config?.refundedIds||[]});}
 function render(){if(!state)return;welcome();const s=currentSum();$('pending-total').textContent=money(s.pendingTotal);$('pool-balance').textContent=money(s.poolBalance);$('personal-total').textContent=money(s.transfers.reduce((v,t)=>v+t.krw,0));$('record-count').textContent=`${state.records.filter(x=>!x.deleted).length}건`;
@@ -375,21 +376,24 @@ const TS_LABELS={opening:'공통통장 최초금액',flight:'항공권 + 호텔�
 function tsFormatMoney(input){if(!input)return;const raw=input.value.replace(/[^0-9]/g,'');input.value=raw?Number(raw).toLocaleString('ko-KR'):'';}
 function tsNumber(input){return input.value.trim()===''?null:Number(input.value.replace(/,/g,''));}
 function tsValues(){const v={};for(const k of TS_KEYS)v[k]=tsNumber($('ts-'+k));return v;}
-function tsPreview(){const v=tsValues(),hasClosing=v.closing!==null,spent=hasClosing?v.opening-v.closing:null,other=hasClosing?spent-v.flight-v.refund:null;
+let tsDeleted=[];
+function tsApplyDeleted(){for(const k of TS_KEYS){const row=$('ts-'+k).closest('tr');row.hidden=tsDeleted.includes(k);let btn=row.querySelector('.ts-delete');if(!btn){btn=document.createElement('button');btn.type='button';btn.className='ts-delete';btn.textContent='삭제';btn.style.cssText='margin-left:7px;font-size:12px;padding:5px 8px';row.querySelector('td').appendChild(btn);btn.onclick=()=>{if(who!=='moon_hw')return;if(!confirm(TS_LABELS[k]+' 항목을 삭제할까요?'))return;tsDeleted.push(k);tsApplyDeleted();tsPreview();};}btn.hidden=who!=='moon_hw';}try{localStorage.setItem('q7_trip_deleted_v1',JSON.stringify(tsDeleted));}catch{}}
+
+function tsPreview(){const v=tsValues(),hasClosing=v.closing!==null&&!tsDeleted.includes('closing'),spent=hasClosing?(tsDeleted.includes('opening')?0:v.opening)-v.closing:null,other=hasClosing?spent-(tsDeleted.includes('flight')?0:v.flight)-(tsDeleted.includes('refund')?0:v.refund):null;
  $('ts-preview').innerHTML='<h3>종합정산 요약</h3><p>공통통장 사용액: <b>'+(hasClosing?money(spent):'최종 잔액 입력 필요')+'</b></p><p>문호원 입금 필요: <b>'+money(v.refund)+'</b></p><p>기타 지출·조정 차액: <b>'+(hasClosing?money(other):'미확정')+'</b></p><p class="hint">'+(v.car+v.museum===v.refund?'✓ 차량 + 박물관 합계와 환급액 일치':'⚠ 환급액과 세부내역 불일치')+' · 입금 완료 여부는 비고에서 수정하세요.</p>';
  try{localStorage.setItem('q7_trip_report_v2',JSON.stringify(v));}catch{}
 }
 function tsPdf(){const v=tsValues(),spent=v.opening-v.closing,other=spent-v.flight-v.refund;
- const lines=Object.keys(TS_LABELS).map(k=>[TS_LABELS[k],v[k]===null?'미입력':v[k]]);
- lines.push(['문호원 환급 검토 합계',v.refund+v.alipay]);lines.push(['공통통장 사용액',spent]);lines.push(['기타 지출·조정 차액',other]);
+ const lines=Object.keys(TS_LABELS).filter(k=>!tsDeleted.includes(k)).map(k=>[TS_LABELS[k],v[k]===null?'미입력':v[k]]);
+ if(!tsDeleted.includes('refund')||!tsDeleted.includes('alipay'))lines.push(['문호원 환급 검토 합계',(tsDeleted.includes('refund')?0:v.refund)+(tsDeleted.includes('alipay')?0:v.alipay)]);lines.push(['공통통장 사용액',spent]);lines.push(['기타 지출·조정 차액',other]);
  const w=window.open('','_blank');if(!w){notice('팝업을 허용한 뒤 다시 눌러주세요.',true);return;}
  const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const html='<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>칭다오 여행 종합정산</title><style>body{font-family:system-ui,"Noto Sans KR",sans-serif;color:#17243a;max-width:950px;margin:30px auto;padding:0 20px}h1{border-bottom:3px solid #237f70;padding-bottom:14px}table{border-collapse:collapse;width:100%;margin:24px 0}td,th{border-bottom:1px solid #ddd;padding:12px;text-align:left}td:nth-child(2){text-align:right;white-space:nowrap}.muted{color:#59687a;font-size:13px}.note{white-space:pre-wrap;background:#f3f6f8;padding:15px}@media print{button{display:none}body{margin:0;max-width:none}}@page{size:A4;margin:14mm}</style></head><body><h1>칭다오 여행 종합정산</h1><p class="muted">2026.11.09 ~ 11.11 · 7명 · 작성일 '+esc(new Date().toLocaleDateString('ko-KR'))+'</p><table><thead><tr><th>용도</th><th>금액 (원)</th></tr></thead><tbody>'+lines.map(([k,n])=>'<tr><td>'+esc(k)+'</td><td>'+esc(money(n))+'</td></tr>').join('')+'</tbody></table><p class="muted">※ 차량·박물관은 문호원 환급액 세부내역으로 중복 합산하지 않습니다. 기타 50,000원은 제외합니다.</p><button onclick="window.print()">PDF로 저장 / 인쇄</button></body></html>';
  w.document.open();w.document.write(html);w.document.close();w.focus();
 }
-function tsInit(){try{const v=JSON.parse(localStorage.getItem('q7_trip_report_v2')||'{}');for(const k of TS_KEYS)if(v[k]!==undefined&&v[k]!==null)$('ts-'+k).value=Number(v[k]).toLocaleString('ko-KR');}catch{}
- tsPreview();for(const k of TS_KEYS)$('ts-'+k).addEventListener('input',()=>{tsFormatMoney($('ts-'+k));tsPreview();});
- $('ts-form').onsubmit=e=>{e.preventDefault();if(tsNumber($('ts-closing'))===null)return notice('공통통장 최종 잔액을 입력하세요.',true);tsPdf();};
+function tsInit(){try{tsDeleted=JSON.parse(localStorage.getItem('q7_trip_deleted_v1')||'[]').filter(k=>TS_KEYS.includes(k));}catch{tsDeleted=[];}try{const v=JSON.parse(localStorage.getItem('q7_trip_report_v2')||'{}');for(const k of TS_KEYS)if(v[k]!==undefined&&v[k]!==null)$('ts-'+k).value=Number(v[k]).toLocaleString('ko-KR');}catch{}
+ tsApplyDeleted();tsPreview();for(const k of TS_KEYS)$('ts-'+k).addEventListener('input',()=>{tsFormatMoney($('ts-'+k));tsPreview();});
+ $('ts-form').onsubmit=e=>{e.preventDefault();if(!tsDeleted.includes('closing')&&tsNumber($('ts-closing'))===null)return notice('공통통장 최종 잔액을 입력하세요.',true);tsPdf();};
 }
 function bind(){tsInit();document.querySelectorAll('[data-home-target]').forEach(el=>el.onclick=()=>switchTab(el.dataset.homeTarget));$('q7-back-home').onclick=()=>switchTab('home');
   $('login-form').onsubmit=async ev=>{ev.preventDefault();try{const v=await request('/api/login',{method:'POST',needAuth:false,body:{memberId:$('login-member').value,pin:$('login-pin').value}});token=v.token;who=v.memberId;sessionStorage.setItem('q7_token',token);sessionStorage.setItem('q7_who',who);$('login-pin').value='';adminToken='';sessionStorage.removeItem('q7_admin_token');if(v.mustChangePin){show('first-pin-change');notice('새 숫자 4자리 비밀번호를 먼저 설정하세요.');return;}await sync();welcome();show('app');fillAccount();await flushOutbox();await sync();}catch(e){notice(e.message,true);}};
