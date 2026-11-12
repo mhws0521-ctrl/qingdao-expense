@@ -37,6 +37,7 @@
 .ts-scroll{width:100%;overflow-x:auto}.ts-table{width:100%;border-collapse:collapse;table-layout:fixed;min-width:540px}.ts-table th,.ts-table td{border-bottom:1px solid var(--edge);padding:12px 8px;text-align:left;vertical-align:middle}.ts-table th:nth-child(1){width:55%}.ts-table th:nth-child(2){width:45%}.ts-table input{width:100%;min-width:0;font-size:14px;padding:12px 8px;box-sizing:border-box}.ts-emphasis{background:rgba(84,221,197,.1)}@media(max-width:600px){.ts-table{min-width:0;table-layout:fixed}.ts-table th,.ts-table td{padding:9px 3px;font-size:12px;overflow-wrap:anywhere}.ts-table th:nth-child(1){width:52%}.ts-table th:nth-child(2){width:48%}.ts-table input{font-size:12px;padding:9px 4px}}
 .q7-home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.q7-home-card{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:24px;padding:32px;min-height:220px;border-radius:20px;border:1px solid var(--edge);background:#173746;color:var(--text);cursor:pointer}.q7-home-card:nth-child(2){background:#253350}.q7-home-card strong{font-size:25px}.q7-home-card small{font-size:15px;line-height:1.6;color:var(--muted)}.q7-subnav{display:flex;align-items:center;gap:16px;margin:12px 0}[hidden]{display:none!important}@media(max-width:650px){.q7-home-grid{grid-template-columns:1fr}.q7-home-card{min-height:155px;padding:22px}}
 .ts-table tr[hidden]{display:none!important}.ts-delete{background:#5c2630;color:#fff;border:1px solid #9b5360;border-radius:7px;cursor:pointer}
+.ts-table tr[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -104,7 +105,7 @@
  </tbody></table></div>
  <p class="hint">※ 전용차량과 박물관 금액은 환급액 557,869원의 세부내역으로, 총지출에 다시 더하지 않습니다. 기타 50,000원은 제외했습니다.</p>
  
- <div id="ts-preview" class="panel" aria-live="polite"></div>
+ <div id="ts-admin-add" hidden><input id="ts-new-label" placeholder="새 항목 용도" maxlength="70"><input id="ts-new-amount" inputmode="numeric" placeholder="금액 (원)"><button type="button" id="ts-add-btn">항목 추가</button></div><div id="ts-preview" class="panel" aria-live="polite"></div>
  <button class="primary" type="submit">종합정산표 PDF 저장 / 인쇄</button>
  </form></div>
  </section>
@@ -375,7 +376,13 @@ const TS_KEYS=['opening','flight','car','museum','alipay','cho-alipay','kwon-par
 const TS_LABELS={opening:'공통통장 최초금액',flight:'항공권 + 호텔비',car:'전용차량 3건',museum:'맥주박물관 7명',alipay:'문호원 알리페이','cho-alipay':'조동현 알리페이','kwon-parking':'권오성 주차비','han-parking':'한대희 주차비',refund:'문호원 환급 합계',closing:'공통통장 최종 잔액'};
 function tsFormatMoney(input){if(!input)return;const raw=input.value.replace(/[^0-9]/g,'');input.value=raw?Number(raw).toLocaleString('ko-KR'):'';}
 function tsNumber(input){return input.value.trim()===''?null:Number(input.value.replace(/,/g,''));}
-function tsValues(){const v={};for(const k of TS_KEYS)v[k]=tsNumber($('ts-'+k));return v;}
+let tsRemoved=[],tsExtra=[];
+function tsStore(){try{localStorage.setItem('q7_trip_rows_v1',JSON.stringify({removed:tsRemoved,extra:tsExtra}));}catch{}}
+function tsRenderRows(){const tbody=document.querySelector('#ts-form .ts-table tbody');tbody.querySelectorAll('.ts-extra-row').forEach(e=>e.remove());
+for(const item of tsExtra){const tr=document.createElement('tr');tr.className='ts-extra-row';tr.dataset.extraId=item.id;const label=document.createElement('td');label.textContent=item.label;const amt=document.createElement('td');const input=document.createElement('input');input.type='text';input.inputMode='numeric';input.value=item.amount===null?'':Number(item.amount).toLocaleString('ko-KR');input.placeholder='금액 입력';input.oninput=()=>{tsFormatMoney(input);item.amount=tsNumber(input);tsStore();tsPreview();};amt.appendChild(input);tr.append(label,amt);tbody.insertBefore(tr,tbody.lastElementChild);}
+tbody.querySelectorAll('tr').forEach(tr=>{const key=tr.querySelector('input[id^="ts-"]')?.id.slice(3);const id=tr.dataset.extraId;tr.hidden=!!key&&tsRemoved.includes(key);let btn=tr.querySelector('.ts-remove-btn');if(!btn){btn=document.createElement('button');btn.type='button';btn.className='ts-remove-btn';btn.textContent='삭제';btn.style.cssText='margin-left:6px;padding:4px 7px;font-size:12px';tr.firstElementChild.appendChild(btn);btn.onclick=()=>{if(who!=='moon_hw')return;if(!confirm('이 항목을 삭제할까요?'))return;if(id)tsExtra=tsExtra.filter(x=>x.id!==id);else tsRemoved.push(key);tsStore();tsRenderRows();tsPreview();};}btn.hidden=who!=='moon_hw';});
+$('ts-admin-add').hidden=who!=='moon_hw';}
+function tsValues(){const v={};for(const k of TS_KEYS)v[k]=tsRemoved.includes(k)?0:tsNumber($('ts-'+k));return v;}
 let tsDeleted=[];
 function tsApplyDeleted(){for(const k of TS_KEYS){const row=$('ts-'+k).closest('tr');row.hidden=tsDeleted.includes(k);let btn=row.querySelector('.ts-delete');if(!btn){btn=document.createElement('button');btn.type='button';btn.className='ts-delete';btn.textContent='삭제';btn.style.cssText='margin-left:7px;font-size:12px;padding:5px 8px';row.querySelector('td').appendChild(btn);btn.onclick=()=>{if(who!=='moon_hw')return;if(!confirm(TS_LABELS[k]+' 항목을 삭제할까요?'))return;tsDeleted.push(k);tsApplyDeleted();tsPreview();};}btn.hidden=who!=='moon_hw';}try{localStorage.setItem('q7_trip_deleted_v1',JSON.stringify(tsDeleted));}catch{}}
 
@@ -384,7 +391,7 @@ function tsPreview(){const v=tsValues(),hasClosing=v.closing!==null&&!tsDeleted.
  try{localStorage.setItem('q7_trip_report_v2',JSON.stringify(v));}catch{}
 }
 function tsPdf(){const v=tsValues(),spent=v.opening-v.closing,other=spent-v.flight-v.refund;
- const lines=Object.keys(TS_LABELS).filter(k=>!tsDeleted.includes(k)).map(k=>[TS_LABELS[k],v[k]===null?'미입력':v[k]]);
+ const lines=Object.keys(TS_LABELS).filter(k=>!tsRemoved.includes(k)).map(k=>[TS_LABELS[k],v[k]===null?'미입력':v[k]]).concat(tsExtra.map(x=>[x.label,x.amount===null?'미입력':x.amount]));
  if(!tsDeleted.includes('refund')||!tsDeleted.includes('alipay'))lines.push(['문호원 환급 검토 합계',(tsDeleted.includes('refund')?0:v.refund)+(tsDeleted.includes('alipay')?0:v.alipay)]);lines.push(['공통통장 사용액',spent]);lines.push(['기타 지출·조정 차액',other]);
  const w=window.open('','_blank');if(!w){notice('팝업을 허용한 뒤 다시 눌러주세요.',true);return;}
  const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
