@@ -15,7 +15,7 @@
 <label>금융기관 유형<select id="institution-type"><option value="BANK">은행</option><option value="SECURITIES">증권사</option><option value="OTHER">기타/해당없음</option></select></label>
 <label>금융기관 코드 / 이름<select id="institution"></select></label>
 <label>상품·계좌·종목명<input id="asset-name" placeholder="예: 정기예금, 삼성전자" required></label>
-<label>평가 기준 연도<input id="asset-year" type="number" min="2000" max="2100" required></label>
+<label>평가 기준 연도<select id="asset-year" required></select></label>
 <label>연말 평가액 (원)<input id="amount" type="number" min="0" step="1" required></label>
 <label>메모<input id="memo" placeholder="계좌 끝 4자리 등"></label>
 <div class="wide flex"><button type="submit">자산 저장</button><button type="button" class="secondary" id="asset-clear">새로 입력</button></div></form></div>
@@ -55,7 +55,7 @@ function fillInst(typeId,instId,chosen){const arr=institutions[$(typeId).value]|
 function fillSubtype(chosen){$('subtype').innerHTML=subtypes[$('category').value].map(n=>'<option>'+esc(n)+'</option>').join('');if(chosen)$('subtype').value=chosen}
 $('institution-type').onchange=()=>fillInst('institution-type','institution');$('income-institution-type').onchange=()=>fillInst('income-institution-type','income-institution');$('category').onchange=()=>{fillSubtype();$('institution-type').value=$('category').value==='STOCK'?'SECURITIES':$('category').value==='DEPOSIT'?'BANK':'OTHER';fillInst('institution-type','institution')};
 fillInst('institution-type','institution');fillInst('income-institution-type','income-institution');fillSubtype();
-const thisYear=new Date().getFullYear();for(let y=thisYear+1;y>=2015;y--){let o=document.createElement('option');o.value=y;o.textContent=y+'년';$('year').append(o)}$('year').value=thisYear;$('asset-year').value=thisYear;$('paid-date').value=thisYear+'-12-31';
+const thisYear=new Date().getFullYear();for(let y=2037;y>=2015;y--){let o=document.createElement('option');o.value=y;o.textContent=y+'년';$('year').append(o)}$('year').value=2025;for(let y=2025;y<=2037;y++){const o=document.createElement('option');o.value=y;o.textContent=y+'년';$('asset-year').append(o)}$('asset-year').value=2025;$('paid-date').value=thisYear+'-12-31';
 function totals(y,owner){const out=Object.fromEntries(Object.keys(categories).map(k=>[k,0]));db.assets.filter(a=>a.review_status==='CONFIRMED'&&a.year===y&&(owner==='all'||a.owner===owner||(owner!=='joint'&&a.owner==='joint'&&false))).forEach(a=>out[a.category]=(out[a.category]||0)+Number(a.amount));return out}
 const sum=o=>Object.values(o).reduce((a,b)=>a+b,0);
 function financial(y,owner){return db.income.filter(i=>i.review_status==='CONFIRMED'&&i.date.slice(0,4)===String(y)&&i.owner===owner&&i.treatment==='GENERAL').reduce((a,i)=>{a[i.type]+=Number(i.gross);return a},{INTEREST:0,DIVIDEND:0})}
