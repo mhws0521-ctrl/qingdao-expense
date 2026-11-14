@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#101b31">
+<meta name="theme-color" content="#101b31"><link rel="icon" href="data:,">
 <title>STOCK LAB · 1,000만 원 단타 연구소</title>
 <style>
 :root{--bg:#f3f6fb;--ink:#14243b;--muted:#6b7890;--nav:#111d32;--blue:#2563eb;--line:#e1e7f0;--green:#13866d;--red:#dc4b5a;--card:#fff;font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif;color:var(--ink);background:var(--bg)}
@@ -53,7 +53,7 @@ main{max-width:1200px;margin:auto;padding:22px}.intro{display:flex;align-items:f
 </main><div id="toast" role="status"></div>
 <script>
 "use strict";
-const URL="https://sntedkakwtdfrahlkcgh.supabase.co";
+const SUPABASE_URL="https://sntedkakwtdfrahlkcgh.supabase.co";
 const KEY="sb_publishable_EnIeESUlQmo0AImAqdKATQ_FfFizLES";
 const NAMES={"005930":"삼성전자","000660":"SK하이닉스","035420":"NAVER","005380":"현대차","068270":"셀트리온"};
 const $=id=>document.getElementById(id);
@@ -183,7 +183,7 @@ $("timeframe").onchange=()=>{
  if(tf==="1m"&&["volume","momentum"].includes($("strategy").value))$("strategy").value="orb";
 };
 (async()=>{paint();if(!window.supabase){toast("Supabase SDK 로드 실패. 네트워크를 확인하세요.");return}
- client=window.supabase.createClient(URL,KEY);
+ client=window.supabase.createClient(SUPABASE_URL,KEY);
  await authChanged();
  client.auth.onAuthStateChange(()=>setTimeout(authChanged,0));
  setInterval(()=>{if(user)reload()},6000);
