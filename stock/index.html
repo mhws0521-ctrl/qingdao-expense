@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101b31">
+<title>STOCK LAB · 1,000만 원 단타 연구소</title>
+<style>
+:root{--bg:#f3f6fb;--ink:#14243b;--muted:#6b7890;--nav:#111d32;--blue:#2563eb;--line:#e1e7f0;--green:#13866d;--red:#dc4b5a;--card:#fff;font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif;color:var(--ink);background:var(--bg)}
+*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer;border:0;border-radius:9px;padding:11px 15px;font-weight:700}button:disabled{opacity:.4;cursor:default}button.primary{background:var(--blue);color:white}button.dark{background:#203554;color:white}button.subtle{background:#eaf0fa;color:#28456e}button.danger{background:#fff0f1;color:#be3749}button.outline{border:1px solid #9eb6e2;background:white;color:#2455a2}
+input,select{min-width:0;max-width:100%;background:white;border:1px solid #ccd7e6;border-radius:9px;padding:11px;color:var(--ink)}
+.top{background:var(--nav);color:white;padding:19px 22px}.topinner{max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;align-items:center;gap:12px}.brandmark{display:grid;place-items:center;background:#316aec;width:43px;height:43px;border-radius:14px;font-weight:900;font-size:23px}.brand b{font-size:21px;letter-spacing:-.7px}.brand small{display:block;color:#adbcd2;font-size:12px}.env{background:#394761;color:#dce7fc;border-radius:100px;padding:6px 12px;font-size:12px;font-weight:700}
+main{max-width:1200px;margin:auto;padding:22px}.intro{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:19px;flex-wrap:wrap}.intro h1{font-size:27px;margin:0 0 5px;letter-spacing:-1px}.muted{color:var(--muted);font-size:13px}.intro p{margin:0}.tag{display:inline-block;border-radius:7px;padding:5px 8px;font-size:11px;font-weight:800;background:#fef0d6;color:#9a650b}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.metric{background:var(--card);padding:20px;border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 17px #22334a05}.metric label{color:var(--muted);display:block;font-size:13px}.metric strong{font-size:26px;display:block;letter-spacing:-1px;margin-top:7px}.metric small{font-size:11px;color:var(--muted)}.green{color:var(--green)}.red{color:var(--red)}
+.layout{display:grid;grid-template-columns:1.65fr 1fr;gap:15px;margin-top:16px}.box{background:white;border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:15px;box-shadow:0 4px 15px #14243b04}.box h2{font-size:17px;margin:0}.boxhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}.boxhead .muted{font-size:12px}.hint{font-size:12px;line-height:1.65;color:var(--muted)}.field{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#405169}.controlgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.actionbar{display:flex;flex-wrap:wrap;gap:8px}.actions button{flex:1;white-space:nowrap;font-size:13px}.chart{height:242px;background:linear-gradient(180deg,#fbfdff,#f5f9ff);border:1px solid #edf1f8;border-radius:12px;padding:9px}.chart svg{width:100%;height:100%}.chartmeta{display:flex;gap:22px;flex-wrap:wrap;padding-top:10px;font-size:12px;color:#66758e}
+.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px;text-align:left;white-space:nowrap}th{color:var(--muted);font-size:11px;font-weight:700;background:#f5f8fc}td,th{padding:11px 9px;border-bottom:1px solid #edf0f5}td:last-child,th:last-child{text-align:right}.status{display:inline-block;border-radius:100px;padding:4px 8px;font-size:11px;font-weight:800;background:#eaf2ff;color:#285dc4}.status.done{background:#e4f6f0;color:#11765c}.status.failed{background:#fff0f0;color:#bb3c46}.status.running{background:#fff3de;color:#a36b0c}.result{background:#0f213c;color:#d9e9ff;border-radius:12px;padding:15px;overflow:auto;font-size:12px;line-height:1.7;min-height:112px;white-space:pre-wrap;overflow-wrap:anywhere}.safebox{border:1px solid #e7dac1;background:#fffbf1;border-radius:12px;padding:13px;color:#8b631f;font-size:12px;line-height:1.6}.auth{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:12px}.auth .field{flex:1;min-width:150px}.auth button{font-size:12px}.hide{display:none!important}.smallline{font-size:12px;color:var(--muted)}footer{font-size:12px;color:var(--muted);text-align:center;padding:16px 0 40px}#toast{position:fixed;z-index:100;bottom:18px;left:50%;transform:translateX(-50%);border-radius:12px;padding:12px 18px;background:#182b48;color:white;max-width:min(600px,92vw);box-shadow:0 10px 30px #1115;display:none;font-size:13px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.metric strong{font-size:24px}}
+@media(max-width:570px){main{padding:13px}.top{padding:15px}.brand b{font-size:18px}.brand small{font-size:11px}.intro h1{font-size:24px}.metric{padding:14px}.metric strong{font-size:22px}.box{padding:15px}.controlgrid{grid-template-columns:1fr 1fr}.actions button{flex:1 0 43%}.env{font-size:10px}.chart{height:200px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.min.js"></script>
+</head><body>
+<header class="top"><div class="topinner"><div class="brand"><div class="brandmark">↗</div><div><b>STOCK LAB</b><small>한국주식 단타 연구 · KIS / Supabase</small></div></div><span class="env" id="mode">DEMO PREVIEW</span></div></header>
+<main>
+<section class="intro"><div><h1>나의 1,000만 원 단타 연구소</h1><p class="muted">한국투자증권 시세 · 4종 전략 · 백테스트 · 가상매매 · 손실 제한</p></div><span class="tag">실계좌 주문 기능 없음</span></section>
+<section class="box" style="margin-bottom:15px"><div class="boxhead"><h2>계정 연결</h2><span class="muted" id="authinfo">로그인 전에는 예시 화면만 표시됩니다.</span></div>
+<div class="auth" id="authfields"><label class="field">이메일<input type="email" id="email" autocomplete="username" placeholder="you@example.com"></label><label class="field">비밀번호<input type="password" id="password" autocomplete="current-password" placeholder="6자 이상"></label><button class="primary" id="signin">로그인</button><button class="subtle" id="signup">계정 만들기</button></div>
+<div class="auth hide" id="signed"><span class="smallline" id="signedemail"></span><button class="subtle" id="signout">로그아웃</button></div></section>
+<section class="metrics">
+<div class="metric"><label>가상계좌 평가금액</label><strong id="equity">10,000,000원</strong><small>실거래 자금이 아닙니다</small></div>
+<div class="metric"><label>현금 예수금</label><strong id="cash">10,000,000원</strong><small>초기 설정 1,000만 원</small></div>
+<div class="metric"><label>가상 평가손익</label><strong id="profit">0원</strong><small id="return">0.00%</small></div>
+<div class="metric"><label>최근 백테스트 MDD</label><strong id="mdd">—</strong><small>최대 낙폭 (손실위험)</small></div>
+</section>
+<div class="layout"><div>
+<section class="box"><div class="boxhead"><h2>전략 수익 곡선</h2><span class="muted" id="chartlabel">데모 미리보기</span></div><div class="chart" id="chart"></div><div class="chartmeta"><span id="btreturn">기간 수익률 —</span><span id="bttrades">청산 거래 —</span><span id="btwin">승률 —</span></div></section>
+<section class="box"><div class="boxhead"><h2>관심 종목</h2><span class="muted">5개 종목 · 시세는 KIS 수집 후 갱신</span></div><div class="tablewrap"><table><thead><tr><th>종목</th><th>코드</th><th>저장된 종가</th><th>출처</th></tr></thead><tbody id="watch"></tbody></table></div></section>
+<section class="box"><div class="boxhead"><h2>가상 보유종목</h2><span class="muted">최대 20%/종목 · 총 80%</span></div><div class="tablewrap"><table><thead><tr><th>종목</th><th>수량</th><th>평균 단가</th><th>평가손익</th></tr></thead><tbody id="positions"></tbody></table></div></section>
+</div><div>
+<section class="box"><div class="boxhead"><h2>분석 및 매매 제어</h2><span class="status" id="workerstatus">연결 대기</span></div>
+<div class="controlgrid">
+<label class="field">종목<select id="symbol"><option value="005930">삼성전자 005930</option><option value="000660">SK하이닉스 000660</option><option value="035420">NAVER 035420</option><option value="005380">현대차 005380</option><option value="068270">셀트리온 068270</option></select></label>
+<label class="field">매매전략<select id="strategy"><option value="volume">거래량 급증</option><option value="momentum">1~3일 모멘텀</option><option value="orb">시초가 15분 돌파 (ORB)</option><option value="vwap">VWAP 재돌파</option></select></label>
+<label class="field">데이터 출처<select id="source"><option value="DEMO">연습용 DEMO</option><option value="KIS">한투 실제 시세</option></select></label>
+<label class="field">분석 시간봉<select id="timeframe"><option value="D">일봉</option><option value="1m">1분봉</option></select></label>
+<label class="field">가상 주문 수량<input id="quantity" type="number" value="1" min="1" max="100000" step="1"></label>
+</div>
+<div class="actions"><button class="outline" id="seed">① 데모 데이터 만들기</button><button class="primary" id="backtest">② 백테스트 실행</button><button class="subtle" id="collect">한투 시세 수집</button><button class="subtle" id="scan">조건검색</button><button class="dark" id="buy">가상 매수</button><button class="dark" id="sell">가상 매도</button><button class="danger" id="reset">가상계좌 초기화</button></div>
+<p class="hint">로그인 후 작업이 Supabase에 등록됩니다. Ubuntu worker가 가동 중이면 수 초 뒤 처리합니다. 한투 키가 없으면 데모 데이터만 사용합니다. 시세 수집은 종목별 최대 조회 범위 및 API 제한을 따릅니다.</p>
+</section>
+<section class="box"><div class="boxhead"><h2>최근 실행 결과</h2><span class="muted" id="lastupdate">아직 없음</span></div><div class="result" id="result">로그인 후 '데모 데이터 만들기'부터 실행하세요. 서버가 미연결이면 작업이 대기 상태로 남습니다.</div></section>
+<section class="box"><div class="boxhead"><h2>작업 이력</h2><button class="subtle" id="refresh">새로고침</button></div><div class="tablewrap"><table><thead><tr><th>작업</th><th>상태</th><th>접수시간</th></tr></thead><tbody id="jobs"></tbody></table></div></section>
+<section class="safebox">⚠ 연구·교육 목적의 가상 거래 시스템입니다. 데모 가격은 실제 시세가 아닙니다. 수수료·거래세·슬리피지는 가정값이며 수익을 보장하지 않습니다. 매수·매도 버튼은 한국투자증권 주문 API를 호출하지 않습니다.</section>
+</div></div>
+<footer>STOCK LAB · Github → Supabase → Ubuntu x86 (SQLite3 / KIS) · PAPER ONLY</footer>
+</main><div id="toast" role="status"></div>
+<script>
+"use strict";
+const URL="https://sntedkakwtdfrahlkcgh.supabase.co";
+const KEY="sb_publishable_EnIeESUlQmo0AImAqdKATQ_FfFizLES";
+const NAMES={"005930":"삼성전자","000660":"SK하이닉스","035420":"NAVER","005380":"현대차","068270":"셀트리온"};
+const $=id=>document.getElementById(id);
+const fmt=n=>Number(n||0).toLocaleString("ko-KR",{maximumFractionDigits:0})+"원";
+let client=null,user=null,remoteState=null,busy=false,toastTimer=0;
+function toast(msg){$("toast").textContent=String(msg);$("toast").style.display="block";clearTimeout(toastTimer);toastTimer=setTimeout(()=>$("toast").style.display="none",4800)}
+function cell(text){const e=document.createElement("td");e.textContent=String(text);return e}
+function row(tbody,values){const tr=document.createElement("tr");values.forEach(v=>tr.appendChild(cell(v)));tbody.appendChild(tr)}
+function graph(points){
+  const arr=points.map(p=>Number(p.equity)).filter(v=>Number.isFinite(v)&&v>0);
+  const target=$("chart");if(arr.length<2){target.textContent="전략을 실행하면 수익 곡선이 표시됩니다.";return}
+  const w=710,h=230,m=12,lo=Math.min(...arr)*.995,hi=Math.max(...arr)*1.005,span=Math.max(1,hi-lo);
+  const xy=arr.map((v,i)=>[m+i/(arr.length-1)*(w-2*m),h-m-(v-lo)/span*(h-2*m)]);
+  const poly=xy.map(p=>p.map(x=>x.toFixed(1)).join(",")).join(" ");
+  const last=xy[xy.length-1],first=xy[0],base=(h-m).toFixed(1);
+  const fill=[m+","+base,poly,last[0].toFixed(1)+","+base].join(" ");
+  target.innerHTML='<svg viewBox="0 0 710 230" preserveAspectRatio="none" role="img" aria-label="누적 평가금액 차트"><defs><linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#367ff2" stop-opacity=".22"/><stop offset="1" stop-color="#367ff2" stop-opacity="0"/></linearGradient></defs><path d="M 12 115 H 698" stroke="#dce6f4" stroke-dasharray="4,6"/><polygon points="'+fill+'" fill="url(#fade)"/><polyline points="'+poly+'" fill="none" stroke="#2869d9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+function sampleGraph(){const seq=[];let v=10000000;for(let i=0;i<85;i++){v*=1+(Math.sin(i*.36)*.0015+.0003);seq.push({equity:v})}graph(seq)}
+function paint(){
+ const s=remoteState;
+ $("mode").textContent=user?"PAPER ONLY · 연결됨":"DEMO PREVIEW";
+ $("workerstatus").textContent=user?(s?"응답 확인":"작업 대기"):"로그인 필요";
+ $("equity").textContent=fmt(s?.equity??10000000);
+ $("cash").textContent=fmt(s?.cash??10000000);
+ $("profit").textContent=fmt(s?.profit??0);
+ $("profit").className=(s?.profit??0)>=0?"green":"red";
+ $("return").textContent=(s?.return_pct??0).toFixed(2)+"%";
+ $("return").className=(s?.return_pct??0)>=0?"green":"red";
+ let r=s?.last_result;
+ if(r?.equity){graph(r.equity);$("mdd").textContent=r.max_drawdown_pct+"%";$("btreturn").textContent="백테스트 "+r.return_pct+"%";$("bttrades").textContent="청산 "+r.closed_trades+"회";$("btwin").textContent="승률 "+r.win_rate_pct+"%";$("chartlabel").textContent=(r.source||"")+" · "+r.strategy+" · "+r.timeframe}
+ else if(!s){sampleGraph();$("mdd").textContent="—";$("chartlabel").textContent="예시 그래프 / 실제 성과 아님"}
+ $("watch").replaceChildren();
+ const latest={...(s?.quotes||{})};
+ for(const p of s?.positions||[])latest[p.symbol]={last:p.last,source:p.source};
+ if(r?.symbol && r.equity && r.symbol in NAMES && !latest[r.symbol]) latest[r.symbol]={last:null,source:r.source};
+ for(const [sym,name] of Object.entries(NAMES)){
+  const d=latest[sym];row($("watch"),[name,sym,d?.last!=null?fmt(d.last):"—",d?.source||"미수집"]);
+ }
+ $("positions").replaceChildren();
+ const pos=s?.positions||[];
+ if(!pos.length)row($("positions"),["보유 없음","—","—","—"]);
+ for(const p of pos)row($("positions"),[p.name||p.symbol,p.qty,fmt(p.avg_cost),fmt(p.pnl)]);
+ $("lastupdate").textContent=s?.last_updated?new Date(s.last_updated).toLocaleString("ko-KR"):"아직 없음";
+ if(r){
+  if(r.equity) $("result").textContent=JSON.stringify({전략:r.strategy,종목:r.symbol,데이터:r.source,초기금액:r.initial,최종평가금액:r.final,수익률:r.return_pct+"%",최대낙폭:r.max_drawdown_pct+"%",청산거래:r.closed_trades,승률:r.win_rate_pct+"%",체결방식:r.assumptions?.fill},null,2);
+  else $("result").textContent=JSON.stringify(r,null,2).slice(0,3000);
+ }
+}
+async function signin(mode){
+ if(!client){toast("Supabase 라이브러리를 불러올 수 없습니다.");return}
+ const email=$("email").value.trim(),password=$("password").value;
+ if(!email.includes("@")||password.length<6){toast("올바른 이메일과 6자 이상 비밀번호를 입력하세요.");return}
+ const r=mode==="up"?await client.auth.signUp({email,password}):await client.auth.signInWithPassword({email,password});
+ if(r.error){toast(r.error.message);return}
+ toast(mode==="up" && !r.data.session?"가입 메일 인증 후 로그인하세요.":"계정 요청 완료");
+ await authChanged();
+}
+async function authChanged(){
+ if(!client)return;
+ const {data,error}=await client.auth.getUser();
+ user=error?null:data.user;
+ $("authfields").classList.toggle("hide",!!user);
+ $("signed").classList.toggle("hide",!user);
+ $("signedemail").textContent=user?.email||"";
+ $("authinfo").textContent=user?"Supabase 인증 계정":"로그인 전에는 예시 화면만 표시됩니다.";
+ remoteState=null;paint();
+ if(user)await reload();
+}
+async function reload(){
+ if(!client || !user || busy)return;
+ busy=true;
+ try{
+  const [st,jb]=await Promise.all([
+   client.from("stock_state").select("payload").eq("user_id",user.id).maybeSingle(),
+   client.from("stock_jobs").select("id,kind,status,error_message,created_at").order("id",{ascending:false}).limit(12)
+  ]);
+  if(st.error)throw st.error;
+  if(jb.error)throw jb.error;
+  remoteState=st.data?.payload||null;paint();
+  $("jobs").replaceChildren();
+  const list=jb.data||[];
+  if(!list.length)row($("jobs"),["작업 없음","—","—"]);
+  for(const j of list){
+    const tr=document.createElement("tr");
+    tr.appendChild(cell(j.kind));
+    const td=cell(j.status+(j.error_message?" (오류)":""));
+    tr.appendChild(td);
+    tr.appendChild(cell(new Date(j.created_at).toLocaleString("ko-KR")));
+    $("jobs").appendChild(tr);
+    if(j.status==="failed"&&j.error_message&&j.id===list[0].id)$("result").textContent="작업 실패: "+j.error_message;
+  }
+ }catch(e){toast("Supabase 조회 실패: "+e.message)}
+ finally{busy=false}
+}
+async function enqueue(kind){
+ if(!client||!user){toast("작업 실행 전 로그인하세요.");return}
+ const symbol=$("symbol").value,strategy=$("strategy").value,timeframe=$("timeframe").value;
+ const quantity=Number($("quantity").value);
+ if((kind==="paper_buy"||kind==="paper_sell")&&(!Number.isInteger(quantity)||quantity<1||quantity>100000)){toast("수량을 확인하세요.");return}
+ if(kind==="paper_reset"&&!confirm("가상매매 내역을 모두 초기화할까요?"))return;
+ const payload={symbol,strategy,timeframe,quantity,source:$("source").value};
+ try{
+  const {error}=await client.from("stock_jobs").insert({user_id:user.id,kind,payload});
+  if(error)throw error;
+  toast(kind+" 작업을 등록했습니다. Ubuntu worker에서 처리합니다.");
+  setTimeout(reload,1100);
+ }catch(e){toast("작업 등록 실패: "+e.message)}
+}
+$("signin").onclick=()=>signin("in");
+$("signup").onclick=()=>signin("up");
+$("signout").onclick=async()=>{if(client)await client.auth.signOut();await authChanged()};
+$("seed").onclick=()=>enqueue("demo");
+$("backtest").onclick=()=>enqueue("backtest");
+$("collect").onclick=()=>enqueue($("timeframe").value==="D"?"collect_daily":"collect_minute");
+$("scan").onclick=()=>enqueue("scan");
+$("buy").onclick=()=>enqueue("paper_buy");
+$("sell").onclick=()=>enqueue("paper_sell");
+$("reset").onclick=()=>enqueue("paper_reset");
+$("refresh").onclick=reload;
+$("strategy").onchange=()=>{
+ const v=$("strategy").value;$("timeframe").value=(v==="orb"||v==="vwap")?"1m":"D";
+};
+$("timeframe").onchange=()=>{
+ const tf=$("timeframe").value;
+ if(tf==="D"&&["orb","vwap"].includes($("strategy").value))$("strategy").value="volume";
+ if(tf==="1m"&&["volume","momentum"].includes($("strategy").value))$("strategy").value="orb";
+};
+(async()=>{paint();if(!window.supabase){toast("Supabase SDK 로드 실패. 네트워크를 확인하세요.");return}
+ client=window.supabase.createClient(URL,KEY);
+ await authChanged();
+ client.auth.onAuthStateChange(()=>setTimeout(authChanged,0));
+ setInterval(()=>{if(user)reload()},6000);
+})();
+</script></body></html>
