@@ -5,7 +5,7 @@
 <script>
 const API='https://sntedkakwtdfrahlkcgh.supabase.co/functions/v1/', $=id=>document.getElementById(id);
 let token=sessionStorage.getItem('fa_pin_token')||'',data={},selected=null,year='2025',view='table';
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;':'&quot;',"'":'&#39;'}[c]));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>Number(n||0).toLocaleString('ko-KR')+'원';
 const types={DEPOSIT:'예금·적금',STOCK:'주식·ETF',GOLD:'금',CRYPTO:'코인',REAL_ESTATE:'부동산',CASH:'현금·외화',DEBT:'부채',LEASE_DEPOSIT:'전세보증금',PENSION:'연금',INSURANCE:'보험',OTHER:'기타'};
 const ownerName={moon:'문호원',kim:'김은경'};
