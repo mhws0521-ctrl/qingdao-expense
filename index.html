@@ -94,20 +94,20 @@ const raw=result.data.text||'',lines=raw.split(/\r?\n/).map(x=>x.trim()).filter(
 const moneyMatches=[...raw.matchAll(/(\d{1,3}(?:,\d{3})+|\d{5,12})\s*원/g)].map(m=>Number(m[1].replace(/,/g,'')));
 const otherMatches=[...raw.matchAll(/(?:\d{1,3}(?:,\d{3})+|\d{5,12})/g)].filter(m=>!/(계좌|농협|은행|번호)/.test(raw.slice(Math.max(0,m.index-15),m.index))).map(m=>Number(m[0].replace(/,/g,'')));
 const amounts=[...new Set([...moneyMatches,...otherMatches].filter(v=>Number.isFinite(v)&&v>=1000&&v<1e13))].sort((a,b)=>b-a);
-const interestMatch=raw.match(/(?:연\s*)?(\d{1,2}(?:[.,]\d{1,3})?)\s*%/);
-const dates=[...raw.matchAll(/(20\d{2})[.\-/\s]+(\d{1,2})[.\-/\s]+(\d{1,2})/g)].map(m=>m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0'));
+const interestMatch=raw.match(/(?:연\s*)?(\d{1,2}(?:[.,]\d{1,3})?)\s*%/);const rateValue=interestMatch?Number(interestMatch[1].replace(',','.')):null;const validRate=rateValue!==null&&rateValue>0&&rateValue<=15?rateValue:null;
+const dates=[...raw.matchAll(/(20\d{2})[.\-/\s]+(\d{1,2})[.\-/\s]+(\d{1,2})/g)].map(m=>m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0')).filter(d=>!Number.isNaN(Date.parse(d)));const uniqueDates=[...new Set(dates)].sort();const startDate=uniqueDates.length>=2?uniqueDates[0]:'';const endDate=uniqueDates.length>=2?uniqueDates[uniqueDates.length-1]:'';
 const detectedInstitution=/지역\s*농협|농축협|지역농축협/.test(raw)?'지역농협':(/농협/.test(raw)?'NH농협은행':(Object.values(institutions).flat().find(([code,n])=>raw.includes(n))?.[0]||''));
 const detectedProduct=/정기\s*예탁금/.test(raw)?'정기예탁금':(/정기\s*예금/.test(raw)?'정기예금':(lines.find(x=>/예탁금|예금|적금/.test(x))||'예금'));
-const candidate={id:uid(),year:Number($('year').value),owner:$('import-owner').value,category:'DEPOSIT',subtype:'정기예금',institution:detectedInstitution,name:detectedProduct,amount:moneyMatches[0]||amounts[0]||0,memo:'사진 인식 · '+f.name+(interestMatch?' · 연 '+interestMatch[1]+'%':'')+(dates.length?' · 기간 '+dates.join(' ~ '):'')+' · 검토 필요',review_status:'REVIEW_PENDING'};
+const candidate={id:uid(),year:Number($('year').value),owner:$('import-owner').value,category:'DEPOSIT',subtype:'정기예금',institution:detectedInstitution,name:detectedProduct,amount:moneyMatches[0]||amounts[0]||0,memo:'사진 인식 · '+f.name+(validRate!==null?' · 연 '+validRate+'%':'')+(startDate?' · 기간 '+startDate+' ~ '+endDate:'')+' · 검토 필요',review_status:'REVIEW_PENDING'};
 const index=pending.push(candidate)-1;
-const box=document.createElement('div');box.className='card';box.innerHTML='<strong>'+esc(f.name)+'</strong><p class="muted">금융기관·상품·금액·이율을 확인하고 필요하면 수정하세요. 계좌번호는 금액으로 저장하지 마세요.</p>'+
+const box=document.createElement('div');box.className='card';box.innerHTML='<strong>'+esc(f.name)+'</strong><p class="muted">금융기관·상품·금액·이율·가입일·만기일을 확인하세요. 이율이 15%를 넘거나 날짜가 하나만 인식되면 추측하지 않고 빈칸으로 둡니다. 계좌번호는 금액으로 저장하지 마세요.</p>'+
 '<label>금융기관<input data-inst-index="'+index+'" value="'+esc(detectedInstitution)+'" placeholder="예: 지역농협"></label>'+
 '<label>상품명<input data-name-index="'+index+'" value="'+esc(detectedProduct)+'"></label>'+
 '<label>금액 선택<select data-amount-index="'+index+'">'+amounts.map(v=>'<option value="'+v+'" '+(v===candidate.amount?'selected':'')+'>'+won(v)+'</option>').join('')+'<option value="custom">직접 입력</option></select></label>'+
 '<label>직접 입력 금액<input type="number" min="0" data-custom-index="'+index+'" placeholder="금액 직접 입력"></label>'+
-'<label>연이율 (%)<input type="number" step="0.001" min="0" data-rate-index="'+index+'" value="'+esc(interestMatch?interestMatch[1].replace(',','.'):'')+'"></label>'+
-'<label>가입일<input type="date" data-start-index="'+index+'" value="'+esc(dates[0]||'')+'"></label>'+
-'<label>만기일<input type="date" data-end-index="'+index+'" value="'+esc(dates[1]||'')+'"></label>'+
+'<label>연이율 (%)<input type="number" step="0.001" min="0" data-rate-index="'+index+'" value="'+esc(validRate===null?'':String(validRate))+'"></label>'+
+'<label>가입일<input type="date" data-start-index="'+index+'" value="'+esc(startDate)+'"></label>'+
+'<label>만기일<input type="date" data-end-index="'+index+'" value="'+esc(endDate)+'"></label>'+
 '<details><summary>인식한 글자 보기</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(raw.slice(0,5000))+'</pre></details>';
 $('ocr-choices').appendChild(box);$('ocr-choices').classList.remove('hidden');state.textContent='인식 완료 · 금액 선택';msgs.push(f.name+': 사진 인식 완료');continue}
 let rows;if(/\.csv$/i.test(f.name))rows=parseCsv(await f.text());else if(/\.xlsx?$/i.test(f.name)){if(!window.XLSX)throw Error('엑셀 라이브러리 로딩 실패');const book=window.XLSX.read(await f.arrayBuffer(),{type:'array'});rows=window.XLSX.utils.sheet_to_json(book.Sheets[book.SheetNames[0]],{header:1})}else throw Error('지원하지 않는 파일');
